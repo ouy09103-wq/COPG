@@ -42,6 +42,8 @@
           <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_sdk">SDK Int</span><span class="field__opt" data-i18n="opt_optional">(optional)</span><span class="field__warn" id="dfSdkWarn" role="button" tabindex="0" data-i18n-attr="aria-label:info_aria" aria-label="What's this?">${WARN_SVG}</span></span>
             <input class="field__input" id="dfSdk" type="text" inputmode="numeric" /></label>
         </div>
+        <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_androidid">Android ID</span><span class="field__opt" data-i18n="opt_optional">(optional)</span><span class="field__warn field__warn--inline" id="dfAndroidIdInfo" role="button" tabindex="0" data-i18n-attr="aria-label:info_aria" aria-label="What's this?">${WARN_SVG}</span><span class="field__gen" id="dfAndroidIdGen" role="button" tabindex="0" data-i18n="serial_gen">Generate</span></span>
+          <input class="field__input field__input--mono" id="dfAndroidId" type="text" maxlength="16" inputmode="latin" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
         <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_serial">Serial Number</span><span class="field__opt" data-i18n="opt_optional">(optional)</span><span class="field__gen" id="dfSerialGen" role="button" tabindex="0" data-i18n="serial_gen">Generate</span></span>
           <input class="field__input field__input--mono" id="dfSerial" type="text" maxlength="24" /></label>
         <div class="form-buttons">
@@ -91,10 +93,10 @@
             <span class="trow__label"><span data-i18n="pkg_t_withcpu">With CPU Spoofing</span>
               <span class="trow__info" role="button" tabindex="0" data-info="withcpu" data-i18n-attr="aria-label:info_aria" aria-label="What's this?">${INFO_SVG}</span></span>
             <span class="toggle"><input type="checkbox" id="pfWithCpu"><span class="toggle__track"><span class="toggle__thumb"></span></span></span></label>
-          <label class="trow" id="pfGotRow">
-            <span class="trow__label"><span data-i18n="pkg_t_got">GOT Hooking</span>
-              <span class="trow__info" role="button" tabindex="0" data-info="got" data-i18n-attr="aria-label:info_aria" aria-label="What's this?">${INFO_SVG}</span></span>
-            <span class="toggle"><input type="checkbox" id="pfGot"><span class="toggle__track"><span class="toggle__thumb"></span></span></span></label>
+          <label class="trow" id="pfCowRow">
+            <span class="trow__label"><span data-i18n="pkg_t_cow">COW Prop Spoof</span>
+              <span class="trow__info" role="button" tabindex="0" data-info="cow" data-i18n-attr="aria-label:info_aria" aria-label="What's this?">${INFO_SVG}</span></span>
+            <span class="toggle"><input type="checkbox" id="pfCow"><span class="toggle__track"><span class="toggle__thumb"></span></span></span></label>
 
           <div class="toggles__head has-divider" id="pfTweakHead" data-i18n="pkg_sec_tweaks">Tweaks</div>
           <label class="trow" id="pfDndRow">
@@ -210,6 +212,7 @@
       $m('#dfAndroid').value = d.ANDROID_VERSION || '';
       $m('#dfSdk').value = d.SDK_INT || '';
       $m('#dfSerial').value = d.SERIAL || '';
+      $m('#dfAndroidId').value = d.ANDROID_ID || '';
     } else {
       form.reset();
     }
@@ -251,6 +254,34 @@
     g.addEventListener('click', gen);
     g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') gen(e); });
   }
+  // ANDROID_ID is exactly 16 lowercase hex chars (a 64-bit value).
+  function genAndroidId() {
+    const hex = '0123456789abcdef';
+    let out = '';
+    try {
+      const buf = new Uint32Array(16);
+      crypto.getRandomValues(buf);
+      for (let i = 0; i < 16; i++) out += hex[buf[i] % 16];
+    } catch (_) {
+      for (let i = 0; i < 16; i++) out += hex[Math.floor(Math.random() * 16)];
+    }
+    return out;
+  }
+  function wireAndroidIdGen() {
+    const g = $m('#dfAndroidIdGen'), s = $m('#dfAndroidId');
+    if (!g || !s) return;
+    const gen = e => { if (e) { e.preventDefault(); e.stopPropagation(); } s.value = genAndroidId(); flash(s); };
+    g.addEventListener('click', gen);
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') gen(e); });
+  }
+  function wireAndroidIdInfo() {
+    const w = $m('#dfAndroidIdInfo');
+    if (!w) return;
+    const open = e => { if (e) { e.preventDefault(); e.stopPropagation(); }
+      info({ title: I18N.t('info_androidid_title'), message: I18N.t('info_androidid_msg') }); };
+    w.addEventListener('click', open);
+    w.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') open(e); });
+  }
   function wireSdkWarn() {
     const w = $m('#dfSdkWarn');
     if (!w) return;
@@ -291,6 +322,7 @@
       name, brand: $m('#dfBrand').value, model,
       manufacturer: fields.manufacturer.value, fingerprint: fields.fingerprint.value,
       android: $m('#dfAndroid').value, sdk: $m('#dfSdk').value, serial: $m('#dfSerial').value,
+      androidId: $m('#dfAndroidId').value,
     }, editingDeviceKey);
 
     closeAll();
@@ -326,8 +358,8 @@
 
   // Spoof toggles (with_cpu/blocked/got) are device-type only. Tweak toggles
   // (dnd/dab/kso/nolog) apply to device AND cpu_only. 'blocked' type gets neither.
-  const SPOOF_EL = ['pfSpoofHead', 'pfWithCpuRow', 'pfGotRow'];
-  const SPOOF_CB = ['pfWithCpu', 'pfGot'];
+  const SPOOF_EL = ['pfSpoofHead', 'pfWithCpuRow', 'pfCowRow'];
+  const SPOOF_CB = ['pfWithCpu', 'pfCow'];
   const TWEAK_EL = ['pfTweakHead', 'pfDndRow', 'pfDabRow', 'pfKsoRow', 'pfNologRow'];
   const TWEAK_CB = ['pfDnd', 'pfDab', 'pfKso', 'pfNolog'];
   function setType(type) {
@@ -360,28 +392,15 @@
   // CPU default is BLOCK (unmount) module-side; "With CPU Spoofing" off = block, so no
   // separate block toggle / mutual-exclusion needed anymore.
 
-  // GOT Hooking keeps the module resident in the target's memory → detectable,
-  // can get a game account banned. Gate ENABLING behind a confirm; disabling is
-  // free. Done on `click` + preventDefault (reliable in the KSU webview) — NOT by
-  // reverting inside `change`, which could leave the toggle stuck (won't turn on).
-  $m('#pfGot').addEventListener('click', e => {
-    if (!$m('#pfGot').checked) return;          // turning it off → allow immediately
-    e.preventDefault();                          // cancel the toggle until confirmed
-    confirm({
-      title:   I18N.t('got_warn_title'),
-      message: I18N.t('got_warn_msg'),
-      okLabel: I18N.t('got_warn_ok'),
-      danger:  true,
-      link:    { href: 'https://t.me/COPG_chat', label: I18N.t('got_warn_link') },
-      onOk:    () => { $m('#pfGot').checked = true; },
-    });
-  });
+  // COW Prop Spoof is stealth (per-process copy-on-write prop edit, module
+  // unloads before the app runs → zero memory residency), so no risk confirm —
+  // it just toggles like any other spoof option.
 
-  // ⓘ on the cpu/got rows → plain-language explanation. preventDefault +
+  // ⓘ on the cpu/cow rows → plain-language explanation. preventDefault +
   // stopPropagation so tapping the icon doesn't toggle the row's checkbox.
   const INFO_KEYS = {
     withcpu:  ['info_withcpu_title',  'info_withcpu_msg'],
-    got:      ['info_got_title',      'info_got_msg'],
+    cow:      ['info_cow_title',      'info_cow_msg'],
     dnd:      ['info_dnd_title',      'info_dnd_msg'],
     dab:      ['info_dab_title',      'info_dab_msg'],
     kso:      ['info_kso_title',      'info_kso_msg'],
@@ -410,7 +429,7 @@
       setType(pkg.type);
       populateDeviceSelect(pkg.deviceKey);
       $m('#pfWithCpu').checked  = !!pkg.with_cpu;
-      $m('#pfGot').checked      = !!pkg.got;
+      $m('#pfCow').checked      = !!pkg.cow;
       $m('#pfDnd').checked      = !!pkg.dnd;
       $m('#pfDab').checked      = !!pkg.dab;
       $m('#pfKso').checked      = !!pkg.kso;
@@ -453,7 +472,7 @@
     COPG.upsertPackage({
       pkg: raw, name: $m('#pfName').value, type, deviceKey,
       with_cpu: $m('#pfWithCpu').checked,
-      got: $m('#pfGot').checked,
+      cow: $m('#pfCow').checked,
       dnd: $m('#pfDnd').checked,
       dab: $m('#pfDab').checked,
       kso: $m('#pfKso').checked,
@@ -530,6 +549,8 @@
   /* init */
   wireAndroidSdk();
   wireSerialGen();
+  wireAndroidIdGen();
+  wireAndroidIdInfo();
   wireSdkWarn();
 
   w.Modals = { openDevice, openPackage, confirm, confirmDelete, info, closeAll };

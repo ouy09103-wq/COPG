@@ -190,7 +190,7 @@ I18N.register('id', {
 
   /* Package tags (chips) */
   tag_withcpu:  'Dengan CPU',
-  tag_got:      'GOT',
+  tag_cow:      'COW',
   tag_dnd:      'DND',
   tag_dab:      'Cerah Auto',
   tag_kso:      'Layar Nyala',
@@ -207,8 +207,11 @@ I18N.register('id', {
   dev_f_android:      'Versi Android',
   dev_f_sdk:          'SDK Int',
   dev_f_serial:       'Nomor Seri',
+  dev_f_androidid:    'Android ID',
   opt_optional:       '(opsional)',
   serial_gen:         'Buat',
+  info_androidid_title: 'Palsukan Android ID',
+  info_androidid_msg: 'Membuat aplikasi pada profil perangkat ini membaca ANDROID_ID palsu (identifier dari Settings.Secure). 16 karakter heksa. Modul dibongkar sebelum aplikasi berjalan, sehingga tidak ada jejak COPG di memori aplikasi. Kosongkan untuk memakai ID asli. Catatan: aplikasi yang gigih masih bisa membaca ID asli lewat cara lain — ini hanya mengubah pencarian Settings standar.',
   info_sdk_title:     'SDK Int',
   info_sdk_msg:       'Level SDK dan Versi Android adalah pasangan yang cocok — terisi otomatis dari Versi Android. Jika kamu menyetel SDK yang tidak cocok, sebagian aplikasi mendeteksi ketidakcocokan dan crash. Edit manual hanya untuk versi Android baru yang belum dikenal modul.',
 
@@ -224,25 +227,20 @@ I18N.register('id', {
   pkg_sec_spoofing: 'Pemalsuan',
   pkg_sec_tweaks:   'Penyesuaian',
   pkg_t_withcpu:  'Dengan Pemalsuan CPU',
-  pkg_t_got:      'GOT Hooking',
+  pkg_t_cow:      'Spoof Prop COW',
   pkg_t_dnd:      'Jangan Ganggu',
   pkg_t_dab:      'Matikan Kecerahan Otomatis',
   pkg_t_kso:      'Biarkan Layar Menyala',
   pkg_t_nolog:    'Matikan Logging',
 
-  /* GOT Hooking warning */
-  got_warn_title: 'Aktifkan GOT Hooking?',
-  got_warn_msg:   'GOT Hooking membuat modul tetap berada di memori aplikasi atau game. Ini bisa terdeteksi dan bahkan dapat membuat akun game-mu diblokir.\n\nYakin ingin mengaktifkannya? Kami sarankan bertanya ke komunitas sebelum memutuskan.',
-  got_warn_ok:    'Tetap aktifkan',
-  got_warn_link:  'Komunitas COPG di Telegram',
 
   /* Toggle info popups */
   info_aria:           'Apa ini?',
   info_ok:             'Mengerti',
   info_withcpu_title:  'Dengan Pemalsuan CPU',
   info_withcpu_msg:    'Selain memalsukan model perangkat, ini juga memalsukan detail prosesor (CPU) ponselmu untuk aplikasi ini. Aktifkan untuk game yang memeriksa chipset. Biarkan mati (bawaan) dan pemalsuan CPU tetap diblokir — yang disukai aplikasi perbankan dan sensitif.',
-  info_got_title:      'GOT Hooking',
-  info_got_msg:        'Cara yang lebih dalam dan agresif untuk menerapkan pemalsuan dari dalam memori aplikasi. Lebih kuat tapi lebih berisiko: bisa terdeteksi dan bahkan membuat akun game diblokir. Aktifkan hanya jika kamu yakin membutuhkannya.',
+  info_cow_title:      'Spoof Prop COW',
+  info_cow_msg:        'Memalsukan properti sistem perangkat (ro.product.*, ro.build.fingerprint …) untuk aplikasi ini sehingga bahkan kode native-nya melihat perangkat palsu. Stealth: nilai ditulis ke tampilan copy-on-write privat dari area properti dan modul dibongkar sebelum aplikasi berjalan — tidak ada jejak COPG di memori aplikasi, aman dari pemindaian memori anti-cheat. Gunakan untuk game yang membaca props secara native.',
   info_dnd_title:      'Jangan Ganggu',
   info_dnd_msg:        'Membisukan panggilan dan notifikasi selama kamu di game ini, agar tidak ada yang mengganggu pertandinganmu. Pengaturan normalmu kembali saat keluar.',
   info_dab_title:      'Matikan Kecerahan Otomatis',

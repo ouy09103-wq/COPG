@@ -190,7 +190,7 @@ I18N.register('es', {
 
   /* Package tags (chips) */
   tag_withcpu:  'Con CPU',
-  tag_got:      'GOT',
+  tag_cow:      'COW',
   tag_dnd:      'No molestar',
   tag_dab:      'Brillo auto',
   tag_kso:      'Pantalla on',
@@ -207,8 +207,11 @@ I18N.register('es', {
   dev_f_android:      'Versión de Android',
   dev_f_sdk:          'SDK Int',
   dev_f_serial:       'Número de serie',
+  dev_f_androidid:    'Android ID',
   opt_optional:       '(opcional)',
   serial_gen:         'Generar',
+  info_androidid_title: 'Falsificar Android ID',
+  info_androidid_msg: 'Hace que las apps de este perfil de dispositivo lean un ANDROID_ID falso (el identificador de Settings.Secure). 16 caracteres hex. El módulo se descarga antes de que la app se ejecute, así no queda nada de COPG en su memoria. Déjalo vacío para mantener el ID real. Nota: una app decidida puede leer el ID real por otros medios — esto solo cambia la consulta estándar de Settings.',
   info_sdk_title:     'SDK Int',
   info_sdk_msg:       'El nivel de SDK y la versión de Android van emparejados — se rellena automáticamente desde la versión de Android. Si pones un SDK que no coincide, algunas apps detectan el desajuste y se cierran. Edítalo a mano solo para una versión de Android nueva que el módulo aún no conozca.',
 
@@ -224,25 +227,20 @@ I18N.register('es', {
   pkg_sec_spoofing: 'Suplantación',
   pkg_sec_tweaks:   'Ajustes',
   pkg_t_withcpu:  'Con suplantación de CPU',
-  pkg_t_got:      'GOT Hooking',
+  pkg_t_cow:      'Spoof de props COW',
   pkg_t_dnd:      'No molestar',
   pkg_t_dab:      'Desactivar brillo automático',
   pkg_t_kso:      'Mantener pantalla encendida',
   pkg_t_nolog:    'Desactivar registro',
 
-  /* GOT Hooking warning */
-  got_warn_title: '¿Activar GOT Hooking?',
-  got_warn_msg:   'GOT Hooking mantiene el módulo residente en la memoria de la app o juego. Esto puede detectarse e incluso provocar el baneo de tu cuenta del juego.\n\n¿Seguro que quieres activarlo? Te recomendamos preguntar a la comunidad antes de decidir.',
-  got_warn_ok:    'Activar de todos modos',
-  got_warn_link:  'Comunidad COPG en Telegram',
 
   /* Toggle info popups */
   info_aria:           '¿Qué es esto?',
   info_ok:             'Entendido',
   info_withcpu_title:  'Con suplantación de CPU',
   info_withcpu_msg:    'Además de falsear el modelo del dispositivo, esto también falsea los detalles del procesador (CPU) de tu teléfono para esta app. Actívalo para juegos que comprueban el chipset. Déjalo desactivado (por defecto) y la suplantación de CPU queda bloqueada — lo que prefieren las apps bancarias y sensibles.',
-  info_got_title:      'GOT Hooking',
-  info_got_msg:        'Una forma más profunda y agresiva de aplicar la suplantación desde dentro de la memoria de la app. Más potente pero más arriesgada: puede detectarse e incluso provocar el baneo de una cuenta de juego. Actívala solo si sabes que la necesitas.',
+  info_cow_title:      'Spoof de props COW',
+  info_cow_msg:        'Falsifica las propiedades del sistema (ro.product.*, ro.build.fingerprint …) para esta app, de modo que incluso su código nativo vea el dispositivo falso. Sigiloso: los valores se escriben en una vista privada copy-on-write del área de propiedades y el módulo se descarga antes de que la app se ejecute — no queda nada de COPG en su memoria, a salvo de los escaneos de memoria anti-trampas. Úsalo para juegos que leen props de forma nativa.',
   info_dnd_title:      'No molestar',
   info_dnd_msg:        'Silencia llamadas y notificaciones mientras estás en este juego, para que nada interrumpa tu partida. Tu ajuste normal vuelve al salir.',
   info_dab_title:      'Desactivar brillo automático',
