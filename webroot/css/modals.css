@@ -128,6 +128,23 @@
 .field-row { display:flex; gap:10px; }
 .field-row .field { flex:1; }
 
+/* Collapsible "Advanced build props" group in the device modal */
+.adv-group { margin-bottom:14px; }
+.adv-toggle {
+  display:flex; align-items:center; gap:6px; width:100%;
+  background:none; border:none; padding:6px 2px; cursor:pointer;
+  -webkit-tap-highlight-color:transparent; font-family:inherit;
+}
+.adv-toggle:active { opacity:.7; }
+.adv-toggle .field__label { cursor:pointer; }
+.adv-caret {
+  margin-left:auto; flex-shrink:0; color:var(--accent-primary);
+  transition:transform var(--dur-fast) var(--ease-out);
+}
+.adv-group.is-open .adv-caret { transform:rotate(180deg); }
+.adv-body { padding-top:6px; }
+.adv-body[hidden] { display:none; }
+
 /* validation */
 .field--error .field__input,
 .field--error .field__select,

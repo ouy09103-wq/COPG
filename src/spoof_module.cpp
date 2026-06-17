@@ -87,6 +87,12 @@ struct DeviceInfo {
     bool should_spoof_serial = false;
     std::string android_id;                   // Settings.Secure ANDROID_ID spoof (optional, per device profile)
     bool should_spoof_android_id = false;
+    // Optional extra Build.* / Build$VERSION.* string fields (BOARD, HARDWARE,
+    // DISPLAY, ID, BOOTLOADER, TAGS, TYPE, SOC_MANUFACTURER, SOC_MODEL, plus the
+    // VERSION ones SECURITY_PATCH/INCREMENTAL/CODENAME). Keyed by Build field name
+    // → value; only the ones present in the device profile are here. Set via JNI
+    // (always, on device spoof) and mirrored into prop_overrides for COW.
+    std::unordered_map<std::string, std::string> extra_build;
     std::unordered_map<std::string, std::string> prop_overrides;
 };
 
@@ -110,6 +116,29 @@ static jfieldID productField = nullptr;
 static jfieldID releaseField = nullptr;
 static jfieldID sdkIntField = nullptr;
 static jfieldID serialField = nullptr;
+
+// Table of OPTIONAL extra Build fields. is_version = the field lives on
+// Build$VERSION (not Build). prop = the matching ro.* property, mirrored into
+// prop_overrides so the `cow` tag also fakes it for native readers. SOC_* are
+// API 31+ — fieldID resolve is guarded, so they're simply skipped on older
+// Android. The COPG.json key for each is the field name itself.
+struct ExtraBuildField { const char* field; const char* prop; bool is_version; };
+static const ExtraBuildField EXTRA_BUILD_FIELDS[] = {
+    {"BOARD",            "ro.product.board",                false},
+    {"HARDWARE",         "ro.hardware",                     false},
+    {"DISPLAY",          "ro.build.display.id",             false},
+    {"ID",               "ro.build.id",                     false},
+    {"BOOTLOADER",       "ro.bootloader",                   false},
+    {"TAGS",             "ro.build.tags",                   false},
+    {"TYPE",             "ro.build.type",                   false},
+    {"SOC_MANUFACTURER", "ro.soc.manufacturer",             false},
+    {"SOC_MODEL",        "ro.soc.model",                    false},
+    {"SECURITY_PATCH",   "ro.build.version.security_patch", true},
+    {"INCREMENTAL",      "ro.build.version.incremental",    true},
+    {"CODENAME",         "ro.build.version.codename",       true},
+};
+static const size_t EXTRA_BUILD_COUNT = sizeof(EXTRA_BUILD_FIELDS) / sizeof(EXTRA_BUILD_FIELDS[0]);
+static jfieldID extraBuildFieldIds[EXTRA_BUILD_COUNT] = { nullptr };
 
 static time_t last_config_mtime = 0;
 static const std::string config_path = "/data/adb/modules/COPG/COPG.json";
@@ -369,6 +398,7 @@ public:
         versionClass = nullptr;
         modelField = brandField = deviceField = manufacturerField = fingerprintField = productField = nullptr;
         releaseField = sdkIntField = nullptr;
+        for (size_t i = 0; i < EXTRA_BUILD_COUNT; i++) extraBuildFieldIds[i] = nullptr;
         
         // ✅ Reload config every time (in case it changed)
         reloadIfNeeded(false);
@@ -582,6 +612,16 @@ private:
             }
         }
 
+        // Optional extra Build / Build$VERSION fields — resolve guarded (SOC_* are
+        // API 31+; a field missing on older Android just stays null and is skipped).
+        for (size_t i = 0; i < EXTRA_BUILD_COUNT; i++) {
+            jclass cls = EXTRA_BUILD_FIELDS[i].is_version ? versionClass : buildClass;
+            extraBuildFieldIds[i] = cls
+                ? env->GetStaticFieldID(cls, EXTRA_BUILD_FIELDS[i].field, "Ljava/lang/String;")
+                : nullptr;
+            if (env->ExceptionCheck()) { env->ExceptionClear(); extraBuildFieldIds[i] = nullptr; }
+        }
+
         if (env->ExceptionCheck()) {
             env->ExceptionClear();
             if (buildClass) env->DeleteGlobalRef(buildClass);
@@ -652,6 +692,20 @@ private:
                     info.prop_overrides["ro.build.fingerprint"] = info.fingerprint;
                     info.prop_overrides["ro.product.name"] = info.product;
                     
+                    // Optional extra Build fields. Each, when present & non-empty, is
+                    // set via JNI (spoofDevice) and mirrored into prop_overrides so a
+                    // cow-tagged app also sees it natively.
+                    for (size_t i = 0; i < EXTRA_BUILD_COUNT; i++) {
+                        const char* k = EXTRA_BUILD_FIELDS[i].field;
+                        if (device.contains(k) && device[k].is_string()) {
+                            std::string v = device[k].get<std::string>();
+                            if (!v.empty()) {
+                                info.extra_build[k] = v;
+                                info.prop_overrides[EXTRA_BUILD_FIELDS[i].prop] = v;
+                            }
+                        }
+                    }
+
                     if (device.contains("PROPS") && device["PROPS"].is_object()) {
                         for (auto& [pk, pv] : device["PROPS"].items()) {
                             info.prop_overrides[pk] = pv.get<std::string>();
@@ -718,11 +772,11 @@ private:
     void spoofDevice(const DeviceInfo& info) {
         if (!buildClass) return;
 
-        auto setStr = [&](jfieldID field, const std::string& value) {
-            if (!field) return;
+        auto setStr = [&](jclass cls, jfieldID field, const std::string& value) {
+            if (!cls || !field) return;
             jstring js = env->NewStringUTF(value.c_str());
             if (!js || env->ExceptionCheck()) { env->ExceptionClear(); return; }
-            env->SetStaticObjectField(buildClass, field, js);
+            env->SetStaticObjectField(cls, field, js);
             env->DeleteLocalRef(js);
             if (env->ExceptionCheck()) env->ExceptionClear();
         };
@@ -733,16 +787,26 @@ private:
             if (env->ExceptionCheck()) env->ExceptionClear();
         };
 
-        setStr(modelField, info.model);
-        setStr(brandField, info.brand);
-        setStr(deviceField, info.device);
-        setStr(manufacturerField, info.manufacturer);
-        setStr(fingerprintField, info.fingerprint);
-        setStr(productField, info.product);
-        
-        if (info.should_spoof_android_version && versionClass && releaseField) setStr(releaseField, info.android_version);
+        setStr(buildClass, modelField, info.model);
+        setStr(buildClass, brandField, info.brand);
+        setStr(buildClass, deviceField, info.device);
+        setStr(buildClass, manufacturerField, info.manufacturer);
+        setStr(buildClass, fingerprintField, info.fingerprint);
+        setStr(buildClass, productField, info.product);
+
+        if (info.should_spoof_android_version && versionClass && releaseField) setStr(versionClass, releaseField, info.android_version);
         if (info.should_spoof_sdk_int && versionClass && sdkIntField) setInt(sdkIntField, info.sdk_int);
-        if (info.should_spoof_serial && serialField) setStr(serialField, info.serial);
+        if (info.should_spoof_serial && serialField) setStr(buildClass, serialField, info.serial);
+
+        // Optional extra Build.* / Build$VERSION.* string fields (skipped when the
+        // field wasn't set on this profile, or its ID didn't resolve on this API).
+        for (size_t i = 0; i < EXTRA_BUILD_COUNT; i++) {
+            if (!extraBuildFieldIds[i]) continue;
+            auto it = info.extra_build.find(EXTRA_BUILD_FIELDS[i].field);
+            if (it == info.extra_build.end() || it->second.empty()) continue;
+            setStr(EXTRA_BUILD_FIELDS[i].is_version ? versionClass : buildClass,
+                   extraBuildFieldIds[i], it->second);
+        }
 
         SPOOF_LOG("Device spoofed: %s (%s)%s", info.model.c_str(), info.brand.c_str(),
                   info.should_spoof_serial ? " +serial" : "");

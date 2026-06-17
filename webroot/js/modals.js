@@ -46,6 +46,52 @@
           <input class="field__input field__input--mono" id="dfAndroidId" type="text" maxlength="16" inputmode="latin" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
         <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_serial">Serial Number</span><span class="field__opt" data-i18n="opt_optional">(optional)</span><span class="field__gen" id="dfSerialGen" role="button" tabindex="0" data-i18n="serial_gen">Generate</span></span>
           <input class="field__input field__input--mono" id="dfSerial" type="text" maxlength="24" /></label>
+        <div class="adv-group" id="dfAdvGroup">
+          <button type="button" class="adv-toggle" id="dfAdvToggle" aria-expanded="false">
+            <span class="field__label" data-i18n="dev_adv_title">Advanced build props</span>
+            <span class="field__opt" data-i18n="opt_optional">(optional)</span>
+            <span class="field__warn field__warn--inline" id="dfAdvInfo" role="button" tabindex="0" data-i18n-attr="aria-label:info_aria" aria-label="What's this?">${WARN_SVG}</span>
+            <svg class="adv-caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="adv-body" id="dfAdvBody" hidden>
+            <div class="field-row">
+              <label class="field"><span class="field__label" data-i18n="dev_f_board">Board</span>
+                <input class="field__input field__input--mono" id="dfBoard" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+              <label class="field"><span class="field__label" data-i18n="dev_f_hardware">Hardware</span>
+                <input class="field__input field__input--mono" id="dfHardware" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+            </div>
+            <div class="field-row">
+              <label class="field"><span class="field__label" data-i18n="dev_f_buildid">Build ID</span>
+                <input class="field__input field__input--mono" id="dfId" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+              <label class="field"><span class="field__label" data-i18n="dev_f_display">Display ID</span>
+                <input class="field__input field__input--mono" id="dfDisplay" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+            </div>
+            <div class="field-row">
+              <label class="field"><span class="field__label" data-i18n="dev_f_bootloader">Bootloader</span>
+                <input class="field__input field__input--mono" id="dfBootloader" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+              <label class="field"><span class="field__label" data-i18n="dev_f_tags">Build Tags</span>
+                <input class="field__input field__input--mono" id="dfTags" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+            </div>
+            <div class="field-row">
+              <label class="field"><span class="field__label" data-i18n="dev_f_btype">Build Type</span>
+                <input class="field__input field__input--mono" id="dfType" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+              <label class="field"><span class="field__label" data-i18n="dev_f_incremental">Incremental</span>
+                <input class="field__input field__input--mono" id="dfIncremental" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+            </div>
+            <div class="field-row">
+              <label class="field"><span class="field__label" data-i18n="dev_f_secpatch">Security Patch</span>
+                <input class="field__input field__input--mono" id="dfSecPatch" type="text" placeholder="YYYY-MM-DD" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+              <label class="field"><span class="field__label" data-i18n="dev_f_codename">Codename</span>
+                <input class="field__input field__input--mono" id="dfCodename" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+            </div>
+            <div class="field-row">
+              <label class="field"><span class="field__label" data-i18n="dev_f_socman">SOC Manufacturer</span>
+                <input class="field__input field__input--mono" id="dfSocMan" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+              <label class="field"><span class="field__label" data-i18n="dev_f_socmodel">SOC Model</span>
+                <input class="field__input field__input--mono" id="dfSocModel" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+            </div>
+          </div>
+        </div>
         <div class="form-buttons">
           <button type="button" class="btn btn--ghost" data-close="deviceModal" data-i18n="btn_cancel">Cancel</button>
           <button type="submit" class="btn btn--primary" data-i18n="btn_save">Save</button>
@@ -196,6 +242,43 @@
   /* ════════════ DEVICE MODAL ════════════ */
   let editingDeviceKey = null;
 
+  /* Optional extra Build.* / Build$VERSION.* fields — [inputId, COPG.json key].
+     Order/keys mirror EXTRA_BUILD_FIELDS in spoof_module.cpp. */
+  const ADV_FIELDS = [
+    ['dfBoard','BOARD'], ['dfHardware','HARDWARE'], ['dfId','ID'], ['dfDisplay','DISPLAY'],
+    ['dfBootloader','BOOTLOADER'], ['dfTags','TAGS'], ['dfType','TYPE'],
+    ['dfIncremental','INCREMENTAL'], ['dfSecPatch','SECURITY_PATCH'], ['dfCodename','CODENAME'],
+    ['dfSocMan','SOC_MANUFACTURER'], ['dfSocModel','SOC_MODEL'],
+  ];
+  function advValues() {
+    const o = {};
+    ADV_FIELDS.forEach(([id, key]) => { o[key] = $m('#' + id).value; });
+    return o;
+  }
+  function setAdvOpen(open) {
+    const g = $m('#dfAdvGroup'), b = $m('#dfAdvBody'), t = $m('#dfAdvToggle');
+    if (!g || !b) return;
+    g.classList.toggle('is-open', !!open);
+    b.hidden = !open;
+    if (t) t.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function wireAdvToggle() {
+    const t = $m('#dfAdvToggle');
+    if (!t) return;
+    t.addEventListener('click', e => {
+      if (e.target.closest('#dfAdvInfo')) return;   // ⓘ has its own handler
+      setAdvOpen($m('#dfAdvBody').hidden);
+    });
+  }
+  function wireAdvInfo() {
+    const w = $m('#dfAdvInfo');
+    if (!w) return;
+    const open = e => { if (e) { e.preventDefault(); e.stopPropagation(); }
+      info({ title: I18N.t('info_adv_title'), message: I18N.t('info_adv_msg') }); };
+    w.addEventListener('click', open);
+    w.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') open(e); });
+  }
+
   function openDevice(deviceKey) {
     const form = $m('#deviceForm');
     clearErrors(form);
@@ -213,8 +296,13 @@
       $m('#dfSdk').value = d.SDK_INT || '';
       $m('#dfSerial').value = d.SERIAL || '';
       $m('#dfAndroidId').value = d.ANDROID_ID || '';
+      let hasAdv = false;
+      ADV_FIELDS.forEach(([id, key]) => { const v = d[key] || ''; $m('#' + id).value = v; if (v) hasAdv = true; });
+      setAdvOpen(hasAdv);                       // auto-expand if this profile uses any
     } else {
       form.reset();
+      ADV_FIELDS.forEach(([id]) => { $m('#' + id).value = ''; });
+      setAdvOpen(false);
     }
     openModal('deviceModal');
   }
@@ -323,6 +411,7 @@
       manufacturer: fields.manufacturer.value, fingerprint: fields.fingerprint.value,
       android: $m('#dfAndroid').value, sdk: $m('#dfSdk').value, serial: $m('#dfSerial').value,
       androidId: $m('#dfAndroidId').value,
+      adv: advValues(),
     }, editingDeviceKey);
 
     closeAll();
@@ -552,6 +641,8 @@
   wireAndroidIdGen();
   wireAndroidIdInfo();
   wireSdkWarn();
+  wireAdvToggle();
+  wireAdvInfo();
 
   w.Modals = { openDevice, openPackage, confirm, confirmDelete, info, closeAll };
 

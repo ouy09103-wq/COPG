@@ -215,6 +215,23 @@ I18N.register('en', {
   info_sdk_title:     'SDK Int',
   info_sdk_msg:       'The SDK level and the Android Version are a matched pair — it auto-fills from the Android Version. If you set an SDK that doesn’t match the version, some apps detect the mismatch and crash. Only edit it by hand for a brand-new Android version the module doesn’t know yet.',
 
+  /* Device modal — advanced Build fields (all optional) */
+  dev_adv_title:      'Advanced build props',
+  dev_f_board:        'Board',
+  dev_f_hardware:     'Hardware',
+  dev_f_buildid:      'Build ID',
+  dev_f_display:      'Display ID',
+  dev_f_bootloader:   'Bootloader',
+  dev_f_tags:         'Build Tags',
+  dev_f_btype:        'Build Type',
+  dev_f_incremental:  'Incremental',
+  dev_f_secpatch:     'Security Patch',
+  dev_f_codename:     'Codename',
+  dev_f_socman:       'SOC Manufacturer',
+  dev_f_socmodel:     'SOC Model',
+  info_adv_title:     'Advanced build props',
+  info_adv_msg:       'Extra device identity fields (Build.BOARD, HARDWARE, DISPLAY, ID, BOOTLOADER, TAGS, TYPE, SECURITY_PATCH, INCREMENTAL, CODENAME, SOC_MANUFACTURER, SOC_MODEL). Each is faked for apps on this profile. Leave a field empty to keep the real value. They are set on Build/Build.VERSION; turn on “COW Prop Spoof” on a package to also fake the matching system property for native code. SOC fields only exist on Android 12+.',
+
   /* Package modal */
   pkg_add_title:  'Add Package',
   pkg_edit_title: 'Edit Package',

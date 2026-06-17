@@ -215,6 +215,23 @@ I18N.register('fa', {
   info_sdk_title:     'SDK Int',
   info_sdk_msg:       'سطح SDK و نسخهٔ اندروید یک جفت هماهنگ‌اند و این مقدار خودکار از نسخهٔ اندروید پر می‌شود. اگر SDK ناهماهنگ با نسخه بگذاری، بعضی برنامه‌ها این ناهماهنگی را تشخیص می‌دهند و کرش می‌کنند. فقط برای نسخهٔ اندروید جدیدی که ماژول هنوز نمی‌شناسد دستی واردش کن.',
 
+  /* مودال دستگاه — فیلدهای پیشرفتهٔ Build (همه اختیاری) */
+  dev_adv_title:      'مشخصات پیشرفتهٔ Build',
+  dev_f_board:        'Board',
+  dev_f_hardware:     'Hardware',
+  dev_f_buildid:      'Build ID',
+  dev_f_display:      'Display ID',
+  dev_f_bootloader:   'Bootloader',
+  dev_f_tags:         'Build Tags',
+  dev_f_btype:        'Build Type',
+  dev_f_incremental:  'Incremental',
+  dev_f_secpatch:     'وصلهٔ امنیتی',
+  dev_f_codename:     'Codename',
+  dev_f_socman:       'سازندهٔ SOC',
+  dev_f_socmodel:     'مدل SOC',
+  info_adv_title:     'مشخصات پیشرفتهٔ Build',
+  info_adv_msg:       'فیلدهای هویتی اضافی دستگاه (Build.BOARD، HARDWARE، DISPLAY، ID، BOOTLOADER، TAGS، TYPE، SECURITY_PATCH، INCREMENTAL، CODENAME، SOC_MANUFACTURER، SOC_MODEL). هر کدام برای برنامه‌های این پروفایل جعل می‌شود. هر فیلدی را خالی بگذاری مقدار واقعی می‌ماند. این‌ها روی Build/Build.VERSION ست می‌شوند؛ برای جعل پراپرتی سیستمی معادل برای کد نیتیو، گزینهٔ «COW Prop Spoof» را روی بسته روشن کن. فیلدهای SOC فقط در اندروید ۱۲ به بالا وجود دارند.',
+
   /* Package modal */
   pkg_add_title:  'افزودن بسته',
   pkg_edit_title: 'ویرایش بسته',

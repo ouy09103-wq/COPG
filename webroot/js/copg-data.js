@@ -6,7 +6,10 @@
      "cpu_spoof": { blacklist:[pkg…], cpu_only_packages:[pkg…] }   // global, optional
      "PACKAGES_<KEY>":        [ "com.x:blocked", "com.y:with_cpu" ] // a device's game list
      "PACKAGES_<KEY>_DEVICE": { BRAND, DEVICE, MANUFACTURER, MODEL,
-                                FINGERPRINT, PRODUCT, SERIAL?, ANDROID_ID?, ANDROID_VERSION?, SDK_INT? }
+                                FINGERPRINT, PRODUCT, SERIAL?, ANDROID_ID?, ANDROID_VERSION?, SDK_INT?,
+                                // optional extra Build fields (JNI + COW), all strings:
+                                BOARD?, HARDWARE?, DISPLAY?, ID?, BOOTLOADER?, TAGS?, TYPE?,
+                                SECURITY_PATCH?, INCREMENTAL?, CODENAME?, SOC_MANUFACTURER?, SOC_MODEL? }
    Insertion order of keys is meaningful and preserved on save (keyOrder).
    Package tags are colon suffixes: pkg:blocked, pkg:with_cpu, pkg:cow.
    Logic ported from the previous WebUI (old.js) for full parity.
@@ -253,6 +256,14 @@
     if ((form.androidId || '').trim()) data.ANDROID_ID = form.androidId.trim().toLowerCase();
     if ((form.android || '').trim()) data.ANDROID_VERSION = form.android.trim();
     if ((form.sdk || '').trim())     data.SDK_INT = form.sdk.trim();
+    // Optional extra Build.* / Build$VERSION.* fields (BOARD, HARDWARE, DISPLAY, ID,
+    // BOOTLOADER, TAGS, TYPE, SECURITY_PATCH, INCREMENTAL, CODENAME, SOC_MANUFACTURER,
+    // SOC_MODEL). Only non-empty ones are emitted; spoof_module sets each via JNI and
+    // mirrors it into props for COW. See EXTRA_BUILD_FIELDS in spoof_module.cpp.
+    if (form.adv) Object.keys(form.adv).forEach(k => {
+      const v = (form.adv[k] || '').trim();
+      if (v) data[k] = v;
+    });
 
     if (editingKey && editingKey !== deviceKey) {
       // renamed: migrate key positions + package array
