@@ -229,8 +229,10 @@ I18N.register('fa', {
   dev_f_codename:     'Codename',
   dev_f_socman:       'سازندهٔ SOC',
   dev_f_socmodel:     'مدل SOC',
+  dev_f_description:  'Build Description',
+  dev_f_builddate:    'Build Date',
   info_adv_title:     'مشخصات پیشرفتهٔ Build',
-  info_adv_msg:       'فیلدهای هویتی اضافی دستگاه (Build.BOARD، HARDWARE، DISPLAY، ID، BOOTLOADER، TAGS، TYPE، SECURITY_PATCH، INCREMENTAL، CODENAME، SOC_MANUFACTURER، SOC_MODEL). هر کدام برای برنامه‌های این پروفایل جعل می‌شود. هر فیلدی را خالی بگذاری مقدار واقعی می‌ماند. این‌ها روی Build/Build.VERSION ست می‌شوند؛ برای جعل پراپرتی سیستمی معادل برای کد نیتیو، گزینهٔ «COW Prop Spoof» را روی بسته روشن کن. فیلدهای SOC فقط در اندروید ۱۲ به بالا وجود دارند.',
+  info_adv_msg:       'فیلدهای هویتی اضافی دستگاه (Build.BOARD، HARDWARE، DISPLAY، ID، BOOTLOADER، TAGS، TYPE، SECURITY_PATCH، INCREMENTAL، CODENAME، SOC_MANUFACTURER، SOC_MODEL). هر کدام برای برنامه‌های این پروفایل جعل می‌شود. هر فیلدی را خالی بگذاری مقدار واقعی می‌ماند. این‌ها روی Build/Build.VERSION ست می‌شوند؛ برای جعل پراپرتی سیستمی معادل برای کد نیتیو، گزینهٔ «COW Prop Spoof» را روی بسته روشن کن. فیلدهای SOC فقط در اندروید ۱۲ به بالا وجود دارند. فیلدهای Build Description (ro.build.description) و Build Date (ro.build.date) فیلد Build ندارند — فقط وقتی «COW Prop Spoof» روشن باشد اعمال می‌شوند.',
 
   /* Package modal */
   pkg_add_title:  'افزودن بسته',

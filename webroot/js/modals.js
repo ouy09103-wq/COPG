@@ -56,40 +56,44 @@
           <div class="adv-body" id="dfAdvBody" hidden>
             <div class="field-row">
               <label class="field"><span class="field__label" data-i18n="dev_f_board">Board</span>
-                <input class="field__input field__input--mono" id="dfBoard" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+                <input class="field__input field__input--mono" id="dfBoard" type="text" placeholder="sm8650" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
               <label class="field"><span class="field__label" data-i18n="dev_f_hardware">Hardware</span>
-                <input class="field__input field__input--mono" id="dfHardware" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+                <input class="field__input field__input--mono" id="dfHardware" type="text" placeholder="qcom" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
             </div>
             <div class="field-row">
               <label class="field"><span class="field__label" data-i18n="dev_f_buildid">Build ID</span>
-                <input class="field__input field__input--mono" id="dfId" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+                <input class="field__input field__input--mono" id="dfId" type="text" placeholder="AP3A.240617.008" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
               <label class="field"><span class="field__label" data-i18n="dev_f_display">Display ID</span>
-                <input class="field__input field__input--mono" id="dfDisplay" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+                <input class="field__input field__input--mono" id="dfDisplay" type="text" placeholder="AP3A.240617.008" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
             </div>
             <div class="field-row">
               <label class="field"><span class="field__label" data-i18n="dev_f_bootloader">Bootloader</span>
-                <input class="field__input field__input--mono" id="dfBootloader" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+                <input class="field__input field__input--mono" id="dfBootloader" type="text" placeholder="unknown" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
               <label class="field"><span class="field__label" data-i18n="dev_f_tags">Build Tags</span>
-                <input class="field__input field__input--mono" id="dfTags" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+                <input class="field__input field__input--mono" id="dfTags" type="text" placeholder="release-keys" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
             </div>
             <div class="field-row">
               <label class="field"><span class="field__label" data-i18n="dev_f_btype">Build Type</span>
-                <input class="field__input field__input--mono" id="dfType" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
-              <label class="field"><span class="field__label" data-i18n="dev_f_incremental">Incremental</span>
-                <input class="field__input field__input--mono" id="dfIncremental" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+                <input class="field__input field__input--mono" id="dfType" type="text" placeholder="user" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+              <label class="field"><span class="field__label" data-i18n="dev_f_codename">Codename</span>
+                <input class="field__input field__input--mono" id="dfCodename" type="text" placeholder="REL" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
             </div>
             <div class="field-row">
-              <label class="field"><span class="field__label" data-i18n="dev_f_secpatch">Security Patch</span>
-                <input class="field__input field__input--mono" id="dfSecPatch" type="text" placeholder="YYYY-MM-DD" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
-              <label class="field"><span class="field__label" data-i18n="dev_f_codename">Codename</span>
-                <input class="field__input field__input--mono" id="dfCodename" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+              <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_secpatch">Security Patch</span><span class="field__gen" id="dfSecPatchGen" role="button" tabindex="0" data-i18n="serial_gen">Generate</span></span>
+                <input class="field__input field__input--mono" id="dfSecPatch" type="text" placeholder="2025-09-05" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+              <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_incremental">Incremental</span><span class="field__gen" id="dfIncrementalGen" role="button" tabindex="0" data-i18n="serial_gen">Generate</span></span>
+                <input class="field__input field__input--mono" id="dfIncremental" type="text" placeholder="20250910.230227" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
             </div>
             <div class="field-row">
               <label class="field"><span class="field__label" data-i18n="dev_f_socman">SOC Manufacturer</span>
-                <input class="field__input field__input--mono" id="dfSocMan" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+                <input class="field__input field__input--mono" id="dfSocMan" type="text" placeholder="Qualcomm" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
               <label class="field"><span class="field__label" data-i18n="dev_f_socmodel">SOC Model</span>
-                <input class="field__input field__input--mono" id="dfSocModel" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+                <input class="field__input field__input--mono" id="dfSocModel" type="text" placeholder="SM8650" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
             </div>
+            <label class="field"><span class="field__label" data-i18n="dev_f_description">Build Description</span>
+              <input class="field__input field__input--mono" id="dfDescription" type="text" placeholder="redfin-user 15 AP3A.240617.008 12345678 release-keys" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+            <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_builddate">Build Date</span><span class="field__gen" id="dfBuildDateGen" role="button" tabindex="0" data-i18n="serial_gen">Generate</span></span>
+              <input class="field__input field__input--mono" id="dfBuildDate" type="text" placeholder="Wed Sep 10 23:02:27 UTC 2025" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
           </div>
         </div>
         <div class="form-buttons">
@@ -249,6 +253,7 @@
     ['dfBootloader','BOOTLOADER'], ['dfTags','TAGS'], ['dfType','TYPE'],
     ['dfIncremental','INCREMENTAL'], ['dfSecPatch','SECURITY_PATCH'], ['dfCodename','CODENAME'],
     ['dfSocMan','SOC_MANUFACTURER'], ['dfSocModel','SOC_MODEL'],
+    ['dfDescription','DESCRIPTION'], ['dfBuildDate','BUILD_DATE'],   // prop-only (COW)
   ];
   function advValues() {
     const o = {};
@@ -277,6 +282,35 @@
       info({ title: I18N.t('info_adv_title'), message: I18N.t('info_adv_msg') }); };
     w.addEventListener('click', open);
     w.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') open(e); });
+  }
+
+  /* ─── Generators for the synthesizable advanced fields ─── */
+  const _p2 = n => String(n).padStart(2, '0');
+  function _randRecentDate() {                      // random instant within ~last 6 months
+    const back = Math.floor(Math.random() * 180) * 86400000 + Math.floor(Math.random() * 86400000);
+    return new Date(Date.now() - back);
+  }
+  function genSecPatch() {                          // YYYY-MM-05 (patch level, day is conventionally 01/05)
+    const d = _randRecentDate();
+    return `${d.getUTCFullYear()}-${_p2(d.getUTCMonth() + 1)}-05`;
+  }
+  function genIncremental() {                       // YYYYMMDD.HHMMSS — matches the build-number style in fingerprints
+    const d = _randRecentDate();
+    return `${d.getUTCFullYear()}${_p2(d.getUTCMonth() + 1)}${_p2(d.getUTCDate())}.${_p2(d.getUTCHours())}${_p2(d.getUTCMinutes())}${_p2(d.getUTCSeconds())}`;
+  }
+  function genBuildDate() {                          // "Wed Sep 10 23:02:27 UTC 2025"
+    const d = _randRecentDate();
+    const W = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getUTCDay()];
+    const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()];
+    return `${W} ${M} ${d.getUTCDate()} ${_p2(d.getUTCHours())}:${_p2(d.getUTCMinutes())}:${_p2(d.getUTCSeconds())} UTC ${d.getUTCFullYear()}`;
+  }
+  /* Generic Generate-button wiring (non-labelable span → never steals the row tap). */
+  function wireGen(btnId, inputId, genFn) {
+    const g = $m('#' + btnId), s = $m('#' + inputId);
+    if (!g || !s) return;
+    const gen = e => { if (e) { e.preventDefault(); e.stopPropagation(); } s.value = genFn(); flash(s); };
+    g.addEventListener('click', gen);
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') gen(e); });
   }
 
   function openDevice(deviceKey) {
@@ -624,7 +658,26 @@
     });
   });
 
-  /* Keep the focused field above the on-screen keyboard */
+  /* Keep the focused field above the on-screen keyboard.
+     The sheet is position:fixed; bottom:0, so by default the soft keyboard
+     covers the lower fields (the WebView uses resizes-visual — layout viewport
+     doesn't shrink). Track visualViewport: lift the sheet by the keyboard height
+     (--kb-inset) and cap the form sheet to the visible area (--sheet-vh) so its
+     header stays on-screen; then scrollIntoView can reach any field. */
+  (function setupKeyboardInset() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const root = document.documentElement.style;
+    const apply = () => {
+      const kb = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+      root.setProperty('--kb-inset', kb + 'px');
+      if (kb > 80) root.setProperty('--sheet-vh', Math.round(vv.height - 12) + 'px');
+      else root.removeProperty('--sheet-vh');
+    };
+    vv.addEventListener('resize', apply);
+    vv.addEventListener('scroll', apply);
+    apply();
+  })();
   ['#deviceForm', '#packageForm'].forEach(sel => {
     const form = $m(sel);
     form?.addEventListener('focusin', e => {
@@ -643,6 +696,9 @@
   wireSdkWarn();
   wireAdvToggle();
   wireAdvInfo();
+  wireGen('dfSecPatchGen',    'dfSecPatch',    genSecPatch);
+  wireGen('dfIncrementalGen', 'dfIncremental', genIncremental);
+  wireGen('dfBuildDateGen',   'dfBuildDate',   genBuildDate);
 
   w.Modals = { openDevice, openPackage, confirm, confirmDelete, info, closeAll };
 
