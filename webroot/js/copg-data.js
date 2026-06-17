@@ -243,27 +243,33 @@
     const deviceKey = deviceKeyFromName(name);
     const packageKey = pkgKeyOf(deviceKey);
 
-    const data = {
-      BRAND: brand,
-      DEVICE: name,
-      MANUFACTURER: (form.manufacturer || '').trim() || 'Unknown',
-      MODEL: model,
-      FINGERPRINT: (form.fingerprint || '').trim()
-        || `${brand}/${model}/${model}:14/UP1A.231005.007/20230101:user/release-keys`,
-      PRODUCT: model,
-    };
-    if ((form.serial || '').trim())  data.SERIAL = form.serial.trim();
+    // Merge over the existing object on edit (not a full rebuild) so keys the
+    // form doesn't manage — e.g. a hand-added PROPS:{} object — survive. Spread
+    // keeps original key order; managed keys are overwritten in place, blanked
+    // optional keys are deleted.
+    const prev = (editingKey && config[editingKey] && typeof config[editingKey] === 'object')
+      ? config[editingKey] : {};
+    const data = { ...prev };
+    data.BRAND = brand;
+    data.DEVICE = name;
+    data.MANUFACTURER = (form.manufacturer || '').trim() || 'Unknown';
+    data.MODEL = model;
+    data.FINGERPRINT = (form.fingerprint || '').trim()
+      || `${brand}/${model}/${model}:14/UP1A.231005.007/20230101:user/release-keys`;
+    data.PRODUCT = model;
+    // Optional fields: set when present, delete when blank (so clearing a field
+    // in the form actually removes it from the profile rather than going stale).
+    const setOpt = (key, val) => { const v = (val || '').trim(); if (v) data[key] = v; else delete data[key]; };
+    setOpt('SERIAL', form.serial);
     if ((form.androidId || '').trim()) data.ANDROID_ID = form.androidId.trim().toLowerCase();
-    if ((form.android || '').trim()) data.ANDROID_VERSION = form.android.trim();
-    if ((form.sdk || '').trim())     data.SDK_INT = form.sdk.trim();
+    else delete data.ANDROID_ID;
+    setOpt('ANDROID_VERSION', form.android);
+    setOpt('SDK_INT', form.sdk);
     // Optional extra Build.* / Build$VERSION.* fields (BOARD, HARDWARE, DISPLAY, ID,
     // BOOTLOADER, TAGS, TYPE, SECURITY_PATCH, INCREMENTAL, CODENAME, SOC_MANUFACTURER,
-    // SOC_MODEL). Only non-empty ones are emitted; spoof_module sets each via JNI and
-    // mirrors it into props for COW. See EXTRA_BUILD_FIELDS in spoof_module.cpp.
-    if (form.adv) Object.keys(form.adv).forEach(k => {
-      const v = (form.adv[k] || '').trim();
-      if (v) data[k] = v;
-    });
+    // SOC_MODEL). spoof_module sets each via JNI and mirrors it into props for COW.
+    // See EXTRA_BUILD_FIELDS in spoof_module.cpp.
+    if (form.adv) Object.keys(form.adv).forEach(k => setOpt(k, form.adv[k]));
 
     if (editingKey && editingKey !== deviceKey) {
       // renamed: migrate key positions + package array
