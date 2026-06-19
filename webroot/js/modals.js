@@ -27,25 +27,25 @@
       </div>
       <form class="sheet-body form-body" id="deviceForm" autocomplete="off">
         <label class="field"><span class="field__label" data-i18n="dev_f_name">Device Name</span>
-          <input class="field__input" id="dfName" type="text" required /></label>
+          <input class="field__input" id="dfName" type="text" placeholder="Pixel 8 Pro" required /></label>
         <label class="field"><span class="field__label" data-i18n="dev_f_brand">Brand</span>
-          <input class="field__input" id="dfBrand" type="text" required /></label>
+          <input class="field__input" id="dfBrand" type="text" placeholder="google" required /></label>
         <label class="field"><span class="field__label" data-i18n="dev_f_model">Model</span>
-          <input class="field__input" id="dfModel" type="text" required /></label>
+          <input class="field__input" id="dfModel" type="text" placeholder="Pixel 8 Pro" required /></label>
         <label class="field"><span class="field__label" data-i18n="dev_f_manufacturer">Manufacturer</span>
-          <input class="field__input" id="dfManufacturer" type="text" required /></label>
+          <input class="field__input" id="dfManufacturer" type="text" placeholder="Google" required /></label>
         <label class="field"><span class="field__label" data-i18n="dev_f_fingerprint">Fingerprint</span>
-          <input class="field__input field__input--mono" id="dfFingerprint" type="text" required /></label>
+          <input class="field__input field__input--mono" id="dfFingerprint" type="text" placeholder="google/husky/husky:15/AP3A.240617.008/12345678:user/release-keys" required /></label>
         <div class="field-row">
           <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_android">Android Version</span><span class="field__opt" data-i18n="opt_optional">(optional)</span></span>
-            <input class="field__input" id="dfAndroid" type="text" inputmode="decimal" /></label>
+            <input class="field__input" id="dfAndroid" type="text" inputmode="decimal" placeholder="15" /></label>
           <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_sdk">SDK Int</span><span class="field__opt" data-i18n="opt_optional">(optional)</span><span class="field__warn" id="dfSdkWarn" role="button" tabindex="0" data-i18n-attr="aria-label:info_aria" aria-label="What's this?">${WARN_SVG}</span></span>
-            <input class="field__input" id="dfSdk" type="text" inputmode="numeric" /></label>
+            <input class="field__input" id="dfSdk" type="text" inputmode="numeric" placeholder="35" /></label>
         </div>
         <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_androidid">Android ID</span><span class="field__opt" data-i18n="opt_optional">(optional)</span><span class="field__warn field__warn--inline" id="dfAndroidIdInfo" role="button" tabindex="0" data-i18n-attr="aria-label:info_aria" aria-label="What's this?">${WARN_SVG}</span><span class="field__gen" id="dfAndroidIdGen" role="button" tabindex="0" data-i18n="serial_gen">Generate</span></span>
-          <input class="field__input field__input--mono" id="dfAndroidId" type="text" maxlength="16" inputmode="latin" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
+          <input class="field__input field__input--mono" id="dfAndroidId" type="text" maxlength="16" inputmode="latin" placeholder="a1b2c3d4e5f60718" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
         <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_serial">Serial Number</span><span class="field__opt" data-i18n="opt_optional">(optional)</span><span class="field__gen" id="dfSerialGen" role="button" tabindex="0" data-i18n="serial_gen">Generate</span></span>
-          <input class="field__input field__input--mono" id="dfSerial" type="text" maxlength="24" /></label>
+          <input class="field__input field__input--mono" id="dfSerial" type="text" maxlength="24" placeholder="1A2B3C4D" /></label>
         <div class="adv-group" id="dfAdvGroup">
           <button type="button" class="adv-toggle" id="dfAdvToggle" aria-expanded="false">
             <span class="field__label" data-i18n="dev_adv_title">Advanced build props</span>
@@ -117,7 +117,7 @@
             </button>
           </div></label>
         <label class="field"><span class="field__label" data-i18n="pkg_f_name">Display Name</span>
-          <input class="field__input" id="pfName" type="text" /></label>
+          <input class="field__input" id="pfName" type="text" placeholder="My Game" /></label>
 
         <div class="field"><span class="field__label" data-i18n="pkg_f_type">Type</span>
           <div class="seg" id="pfType">
