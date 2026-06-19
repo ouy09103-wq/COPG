@@ -140,15 +140,6 @@ static const ExtraBuildField EXTRA_BUILD_FIELDS[] = {
 static const size_t EXTRA_BUILD_COUNT = sizeof(EXTRA_BUILD_FIELDS) / sizeof(EXTRA_BUILD_FIELDS[0]);
 static jfieldID extraBuildFieldIds[EXTRA_BUILD_COUNT] = { nullptr };
 
-// Prop-only extras: there is NO Build static field for these, so they're applied
-// ONLY through the COW prop spoof (the `cow` tag). json_key = COPG.json key.
-struct ExtraPropField { const char* json_key; const char* prop; };
-static const ExtraPropField EXTRA_PROP_FIELDS[] = {
-    {"DESCRIPTION", "ro.build.description"},
-    {"BUILD_DATE",  "ro.build.date"},
-};
-static const size_t EXTRA_PROP_COUNT = sizeof(EXTRA_PROP_FIELDS) / sizeof(EXTRA_PROP_FIELDS[0]);
-
 static time_t last_config_mtime = 0;
 static const std::string config_path = "/data/adb/modules/COPG/COPG.json";
 static const char* spoof_file_path = "/data/adb/modules/COPG/cpuinfo_spoof";
@@ -712,16 +703,6 @@ private:
                                 info.extra_build[k] = v;
                                 info.prop_overrides[EXTRA_BUILD_FIELDS[i].prop] = v;
                             }
-                        }
-                    }
-
-                    // Prop-only extras (ro.build.description, ro.build.date) — no JNI
-                    // field, COW only.
-                    for (size_t i = 0; i < EXTRA_PROP_COUNT; i++) {
-                        const char* k = EXTRA_PROP_FIELDS[i].json_key;
-                        if (device.contains(k) && device[k].is_string()) {
-                            std::string v = device[k].get<std::string>();
-                            if (!v.empty()) info.prop_overrides[EXTRA_PROP_FIELDS[i].prop] = v;
                         }
                     }
 

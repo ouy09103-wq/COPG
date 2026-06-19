@@ -229,10 +229,8 @@ I18N.register('en', {
   dev_f_codename:     'Codename',
   dev_f_socman:       'SOC Manufacturer',
   dev_f_socmodel:     'SOC Model',
-  dev_f_description:  'Build Description',
-  dev_f_builddate:    'Build Date',
   info_adv_title:     'Advanced build props',
-  info_adv_msg:       'Extra device identity fields (Build.BOARD, HARDWARE, DISPLAY, ID, BOOTLOADER, TAGS, TYPE, SECURITY_PATCH, INCREMENTAL, CODENAME, SOC_MANUFACTURER, SOC_MODEL). Each is faked for apps on this profile. Leave a field empty to keep the real value. They are set on Build/Build.VERSION; turn on “COW Prop Spoof” on a package to also fake the matching system property for native code. SOC fields only exist on Android 12+. Build Description (ro.build.description) and Build Date (ro.build.date) have no Build field — they only apply when “COW Prop Spoof” is on.',
+  info_adv_msg:       'Extra device identity fields (Build.BOARD, HARDWARE, DISPLAY, ID, BOOTLOADER, TAGS, TYPE, SECURITY_PATCH, INCREMENTAL, CODENAME, SOC_MANUFACTURER, SOC_MODEL). Each is faked for apps on this profile. Leave a field empty to keep the real value. They are set on Build/Build.VERSION; turn on “COW Prop Spoof” on a package to also fake the matching system property for native code. SOC fields only exist on Android 12+.',
 
   /* Package modal */
   pkg_add_title:  'Add Package',

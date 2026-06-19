@@ -90,10 +90,6 @@
               <label class="field"><span class="field__label" data-i18n="dev_f_socmodel">SOC Model</span>
                 <input class="field__input field__input--mono" id="dfSocModel" type="text" placeholder="SM8650" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
             </div>
-            <label class="field"><span class="field__label" data-i18n="dev_f_description">Build Description</span>
-              <input class="field__input field__input--mono" id="dfDescription" type="text" placeholder="redfin-user 15 AP3A.240617.008 12345678 release-keys" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
-            <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_builddate">Build Date</span><span class="field__gen" id="dfBuildDateGen" role="button" tabindex="0" data-i18n="serial_gen">Generate</span></span>
-              <input class="field__input field__input--mono" id="dfBuildDate" type="text" placeholder="Wed Sep 10 23:02:27 UTC 2025" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
           </div>
         </div>
         <div class="form-buttons">
@@ -253,7 +249,6 @@
     ['dfBootloader','BOOTLOADER'], ['dfTags','TAGS'], ['dfType','TYPE'],
     ['dfIncremental','INCREMENTAL'], ['dfSecPatch','SECURITY_PATCH'], ['dfCodename','CODENAME'],
     ['dfSocMan','SOC_MANUFACTURER'], ['dfSocModel','SOC_MODEL'],
-    ['dfDescription','DESCRIPTION'], ['dfBuildDate','BUILD_DATE'],   // prop-only (COW)
   ];
   function advValues() {
     const o = {};
@@ -297,12 +292,6 @@
   function genIncremental() {                       // YYYYMMDD.HHMMSS — matches the build-number style in fingerprints
     const d = _randRecentDate();
     return `${d.getUTCFullYear()}${_p2(d.getUTCMonth() + 1)}${_p2(d.getUTCDate())}.${_p2(d.getUTCHours())}${_p2(d.getUTCMinutes())}${_p2(d.getUTCSeconds())}`;
-  }
-  function genBuildDate() {                          // "Wed Sep 10 23:02:27 UTC 2025"
-    const d = _randRecentDate();
-    const W = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getUTCDay()];
-    const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()];
-    return `${W} ${M} ${d.getUTCDate()} ${_p2(d.getUTCHours())}:${_p2(d.getUTCMinutes())}:${_p2(d.getUTCSeconds())} UTC ${d.getUTCFullYear()}`;
   }
   /* Generic Generate-button wiring (non-labelable span → never steals the row tap). */
   function wireGen(btnId, inputId, genFn) {
@@ -698,7 +687,6 @@
   wireAdvInfo();
   wireGen('dfSecPatchGen',    'dfSecPatch',    genSecPatch);
   wireGen('dfIncrementalGen', 'dfIncremental', genIncremental);
-  wireGen('dfBuildDateGen',   'dfBuildDate',   genBuildDate);
 
   w.Modals = { openDevice, openPackage, confirm, confirmDelete, info, closeAll };
 
