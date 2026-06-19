@@ -228,9 +228,11 @@ static void companion(int fd) {
 // ANDROID_ID is not a prop/Build field — Settings.Secure.getString reads it
 // through an in-process cache: Settings$Secure.sNameValueCache, which holds
 //   ArrayMap<String,String>              mValues
-//   ArrayMap<String,GenerationTracker>   mGenerationTrackers   (per-key, A15)
+//   ArrayMap<Key,GenerationTracker>      mGenerationTrackers
+//     (key is the name String on Android <=15; a Settings$GenerationTracker$Key
+//      {name,deviceId} on Android 16+ — see the dual-ABI handling in forge below)
 // getStringForUser() returns mValues.get(name) WITHOUT any binder call iff a
-// tracker exists for that name AND tracker.isGenerationChanged()==false.
+// tracker exists for that name/key AND tracker.isGenerationChanged()==false.
 // isGenerationChanged() = (mArray.get(mIndex) != mCurrentGeneration).
 //
 // So we forge the whole thing synchronously, no ContentResolver/ActivityThread
@@ -278,23 +280,50 @@ static void forgeAndroidId(JNIEnv* env, const char* fakeId) {
     if (!mia) { LOGE("[AID] MemoryIntArray create fail"); return; }
     if (miaSet) { env->CallVoidMethod(mia, miaSet, (jint)0, (jint)0); clr(); }
 
-    jstring key = env->NewStringUTF("android_id");
-
-    // GenerationTracker(String name, MemoryIntArray arr, int index, int curGen, Consumer errorHandler)
-    jmethodID gtCtor = env->GetMethodID(gtCls, "<init>",
-        "(Ljava/lang/String;Landroid/util/MemoryIntArray;IILjava/util/function/Consumer;)V"); clr();
-    jobject tracker = gtCtor ? env->NewObject(gtCls, gtCtor, key, mia, (jint)0, (jint)0, (jobject)nullptr) : nullptr; clr();
-    if (!tracker) { LOGE("[AID] GenerationTracker create fail"); return; }
+    jstring nameStr = env->NewStringUTF("android_id");
+    jstring fakeStr = env->NewStringUTF(fakeId);
 
     // ArrayMap.put(Object,Object) via the Map interface signature.
-    jclass amCls = env->GetObjectClass(values);
+    jclass amCls = env->GetObjectClass(tracks);
     jmethodID putMid = env->GetMethodID(amCls, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"); clr();
     env->DeleteLocalRef(amCls);
     if (!putMid) { LOGE("[AID] ArrayMap.put not found"); return; }
 
-    jstring fakeStr = env->NewStringUTF(fakeId);
-    jobject p1 = env->CallObjectMethod(values, putMid, key, fakeStr);  clr(); if (p1) env->DeleteLocalRef(p1);
-    jobject p2 = env->CallObjectMethod(tracks, putMid, key, tracker);  clr(); if (p2) env->DeleteLocalRef(p2);
+    // GenerationTracker has TWO ABIs across Android versions:
+    //   • Android <=15: GenerationTracker(String name, MemoryIntArray, int idx, int gen, Consumer)
+    //                   and mGenerationTrackers is keyed by the name String.
+    //   • Android 16+ : GenerationTracker(Settings$GenerationTracker$Key, MemoryIntArray, int, int,
+    //                   Consumer), where Key(String name, int deviceId); mGenerationTrackers is keyed
+    //                   by that Key (deviceId 0 = default device). mValues stays name-keyed either way.
+    // Try the 16+ Key form first (class only exists there), fall back to the legacy String form.
+    jobject tracker = nullptr;
+    jobject trackerKey = nullptr;   // what mGenerationTrackers is keyed by
+
+    jclass keyCls = env->FindClass("android/provider/Settings$GenerationTracker$Key"); clr();
+    if (keyCls) {
+        jmethodID keyCtor = env->GetMethodID(keyCls, "<init>", "(Ljava/lang/String;I)V"); clr();
+        jmethodID gtCtorK = env->GetMethodID(gtCls, "<init>",
+            "(Landroid/provider/Settings$GenerationTracker$Key;Landroid/util/MemoryIntArray;IILjava/util/function/Consumer;)V"); clr();
+        if (keyCtor && gtCtorK) {
+            jobject kobj = env->NewObject(keyCls, keyCtor, nameStr, (jint)0); clr();   // deviceId 0 = default
+            if (kobj) {
+                tracker = env->NewObject(gtCls, gtCtorK, kobj, mia, (jint)0, (jint)0, (jobject)nullptr); clr();
+                if (tracker) trackerKey = kobj; else env->DeleteLocalRef(kobj);
+            }
+        }
+    }
+    if (!tracker) {
+        jmethodID gtCtorS = env->GetMethodID(gtCls, "<init>",
+            "(Ljava/lang/String;Landroid/util/MemoryIntArray;IILjava/util/function/Consumer;)V"); clr();
+        if (gtCtorS) { tracker = env->NewObject(gtCls, gtCtorS, nameStr, mia, (jint)0, (jint)0, (jobject)nullptr); clr(); }
+        trackerKey = nameStr;
+    }
+    if (!tracker) { LOGE("[AID] GenerationTracker create fail (both ABIs)"); return; }
+
+    // Value map: keyed by the name String (getStringForUser returns mValues.get(name)).
+    jobject p1 = env->CallObjectMethod(values, putMid, nameStr, fakeStr);     clr(); if (p1) env->DeleteLocalRef(p1);
+    // Generation map: keyed by Key (16+) or name String (<=15).
+    jobject p2 = env->CallObjectMethod(tracks, putMid, trackerKey, tracker);  clr(); if (p2) env->DeleteLocalRef(p2);
 
     LOGI("[AID] forged android_id -> %s (synchronous, no thread)", fakeId);
 }
