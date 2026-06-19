@@ -227,12 +227,13 @@ static void companion(int fd) {
 // ─────────────────────────────────────────
 // ANDROID_ID is not a prop/Build field — Settings.Secure.getString reads it
 // through an in-process cache: Settings$Secure.sNameValueCache, which holds
-//   ArrayMap<String,String>              mValues
-//   ArrayMap<Key,GenerationTracker>      mGenerationTrackers
-//     (key is the name String on Android <=15; a Settings$GenerationTracker$Key
-//      {name,deviceId} on Android 16+ — see the dual-ABI handling in forge below)
-// getStringForUser() returns mValues.get(name) WITHOUT any binder call iff a
-// tracker exists for that name/key AND tracker.isGenerationChanged()==false.
+//   ArrayMap  mValues               (value map)
+//   ArrayMap  mGenerationTrackers   (per-key generation tracker)
+//     On Android <=15 both are keyed by the name String. On Android 16+ the cache
+//     is DEVICE-AWARE: both are keyed by a Settings$GenerationTracker$Key
+//     {name,deviceId} (deviceId 0 = default device) — see the dual-ABI forge below.
+// getStringForUser() returns mValues.get(key) WITHOUT any binder call iff a tracker
+// exists for that key AND tracker.isGenerationChanged()==false. (On <=15 "key"==name.)
 // isGenerationChanged() = (mArray.get(mIndex) != mCurrentGeneration).
 //
 // So we forge the whole thing synchronously, no ContentResolver/ActivityThread
@@ -293,8 +294,9 @@ static void forgeAndroidId(JNIEnv* env, const char* fakeId) {
     //   • Android <=15: GenerationTracker(String name, MemoryIntArray, int idx, int gen, Consumer)
     //                   and mGenerationTrackers is keyed by the name String.
     //   • Android 16+ : GenerationTracker(Settings$GenerationTracker$Key, MemoryIntArray, int, int,
-    //                   Consumer), where Key(String name, int deviceId); mGenerationTrackers is keyed
-    //                   by that Key (deviceId 0 = default device). mValues stays name-keyed either way.
+    //                   Consumer), where Key(String name, int deviceId); the cache is device-aware so
+    //                   BOTH mGenerationTrackers AND mValues are keyed by that Key (deviceId 0 =
+    //                   default device), not by the name String like <=15.
     // Try the 16+ Key form first (class only exists there), fall back to the legacy String form.
     jobject tracker = nullptr;
     jobject trackerKey = nullptr;   // what mGenerationTrackers is keyed by
@@ -320,10 +322,17 @@ static void forgeAndroidId(JNIEnv* env, const char* fakeId) {
     }
     if (!tracker) { LOGE("[AID] GenerationTracker create fail (both ABIs)"); return; }
 
-    // Value map: keyed by the name String (getStringForUser returns mValues.get(name)).
-    jobject p1 = env->CallObjectMethod(values, putMid, nameStr, fakeStr);     clr(); if (p1) env->DeleteLocalRef(p1);
+    // Store the value. <=15: getStringForUser returns mValues.get(name). 16+: the cache is
+    // device-aware and the value is looked up by the SAME Key(name, deviceId) as the tracker —
+    // storing it only by name made the tracker hit but the value miss, so the app fell through to
+    // the provider and read the REAL id (verified on Android 16, deviceId 0). So put it under the
+    // Key too on A16; keep the name entry as the <=15 / belt-and-suspenders path.
+    { jobject p = env->CallObjectMethod(values, putMid, nameStr, fakeStr); clr(); if (p) env->DeleteLocalRef(p); }
+    if (keyCls && trackerKey != nameStr) {   // A16 path: trackerKey is the Key(name,0) object
+        jobject pv = env->CallObjectMethod(values, putMid, trackerKey, fakeStr); clr(); if (pv) env->DeleteLocalRef(pv);
+    }
     // Generation map: keyed by Key (16+) or name String (<=15).
-    jobject p2 = env->CallObjectMethod(tracks, putMid, trackerKey, tracker);  clr(); if (p2) env->DeleteLocalRef(p2);
+    { jobject pt = env->CallObjectMethod(tracks, putMid, trackerKey, tracker); clr(); if (pt) env->DeleteLocalRef(pt); }
 
     LOGI("[AID] forged android_id -> %s (synchronous, no thread)", fakeId);
 }
