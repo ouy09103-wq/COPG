@@ -7,8 +7,7 @@
 ## v5.3.1
 ### Hotfix — CPU spoof rolled back (was causing bans)
 *   **Reverted the new CPU spoof method.** v5.3.0 mounted the fake `cpuinfo` inside each game's own process — but that mount is **visible to the app itself** (`/proc/self/mountinfo`), which some games flagged as tampering and **banned**. v5.3.1 restores the **previous CPU spoof** (system-level mount via the helper) that does not expose the mount to the app.
-*   **Trade-off:** the restored method occasionally doesn't apply on the first launch (force-stop + relaunch the game if a profile doesn't take) — but it **does not get you banned**. Reliability work will continue in a safer direction.
-*   **Block / CPU-Only behavior restored** exactly as before (the "Blocked" package type and CPU block list are back).
+*   **CPU blocking is opt-in again (like v4.7.3) — no more 50% failures.** The intermediate 5.1.x builds had every non-spoofed app in a profile force a global CPU "unblock", which raced the spoof mounts so it only landed about half the time. Now only **With CPU Spoofing** mounts and only the **Blocked** type unmounts; everything else leaves the mount alone — so CPU spoof applies reliably again.
 *   **Everything else from v5.3.0 stays:** COW prop spoof, ANDROID_ID spoofing, the extra Build fields, and the tablet navigation-bar fix are all unaffected (none of them mount anything).
 
 > If you installed v5.3.0, **update to v5.3.1** and clear data / force-stop any affected game.
