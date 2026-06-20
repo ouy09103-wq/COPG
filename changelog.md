@@ -4,6 +4,16 @@
 #### **Telegram Channel**:
 - https://t.me/COPG_module
 ---
+## v5.3.1
+### Hotfix — CPU spoof rolled back (was causing bans)
+*   **Reverted the new CPU spoof method.** v5.3.0 mounted the fake `cpuinfo` inside each game's own process — but that mount is **visible to the app itself** (`/proc/self/mountinfo`), which some games flagged as tampering and **banned**. v5.3.1 restores the **previous CPU spoof** (system-level mount via the helper) that does not expose the mount to the app.
+*   **Trade-off:** the restored method occasionally doesn't apply on the first launch (force-stop + relaunch the game if a profile doesn't take) — but it **does not get you banned**. Reliability work will continue in a safer direction.
+*   **Block / CPU-Only behavior restored** exactly as before (the "Blocked" package type and CPU block list are back).
+*   **Everything else from v5.3.0 stays:** COW prop spoof, ANDROID_ID spoofing, the extra Build fields, and the tablet navigation-bar fix are all unaffected (none of them mount anything).
+
+> If you installed v5.3.0, **update to v5.3.1** and clear data / force-stop any affected game.
+
+---
 ## v5.3.0
 ### New Stealth Spoofing Engine
 *   **COW prop spoof replaces GOT hooking.** The old method left a chunk of COPG's code mapped in the game's memory (detectable). The new **`cow` tag** edits device props (`ro.product.*`, fingerprint, and any custom prop) through a per-process copy-on-write page and then **unloads the module before the app runs** — so an anti-cheat scanning memory finds **nothing of COPG mapped**. Same effect, far stealthier. Only your app sees the fake; the system and other apps are untouched.
