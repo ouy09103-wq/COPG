@@ -197,12 +197,18 @@ body::before {
 /* ── Responsive cap ── */
 @media (min-width:480px)  { :root { --page-px:20px; } }
 @media (min-width:600px)  {
+  /* The visible layers are position:fixed and fill the viewport, so a cap on
+     <body> does nothing (the old `body{max-width:480}` was dead — content stayed
+     full-width on tablets). Center the ACTUAL layers into one 480px column: the
+     page stack (`.pages-wrap`) and the ripple overlay. Both clear the base
+     `inset:0`/`right:0` (hence right:auto) so the box doesn't over-constrain.
+     `.bottom-nav` is DELIBERATELY excluded — a `transform` on it breaks the
+     dock's `backdrop-filter` on tablet WebViews (the blur samples the wrong
+     region → dock renders off-center). The dock self-centers via its base
+     `left:0;right:0;justify-content:center` (no transform); tablet sizing lives
+     in nav.css. */
   body { max-width:480px; margin:0 auto; }
-  /* Center the fixed dock + ripple layer on the 480px column. Must clear the
-     base `right:0` / `inset:0` — leaving it set with `left:50%` over-constrains
-     the box (it collapses to the right half), pushing the dock off-center
-     (right in LTR, left in RTL). width + translateX(-50%) centers cleanly. */
-  .bottom-nav,
+  .pages-wrap,
   .ripple-container { left:50%; right:auto; width:480px; max-width:100%; transform:translateX(-50%); }
 }
 
