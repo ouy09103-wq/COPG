@@ -76,7 +76,7 @@ function pkgMatchesFilter(p) {
   const set = installedSet();
   switch (LibQuery.pkgFilter) {
     case 'installed': return set.has(p.clean);
-    case 'blocked':   return p.type === 'blocked';
+    case 'blocked':   return p.type === 'blocked' || p.blocked;
     case 'cpu_only':  return p.type === 'cpu_only';
     default:          return true;
   }
@@ -182,6 +182,7 @@ function renderPackages() {
     // chips: tags + installed (type now shown above the name, not as a chip)
     const chips = card.querySelector('.package-card__chips');
     if (pkg.with_cpu)    chips.appendChild(chip('chip--withcpu', I18N.t('tag_withcpu')));
+    if (pkg.blocked)     chips.appendChild(chip('chip--blocked', I18N.t('tag_block')));
     if (pkg.cow)         chips.appendChild(chip('chip--cow', I18N.t('tag_cow')));
     // tweak tags — muted shared style so they read as a group, not as loud as spoof chips
     if (pkg.dnd)         chips.appendChild(chip('chip--tweak', I18N.t('tag_dnd')));

@@ -178,6 +178,7 @@
         deviceName: deviceName || null,
         tags: tagsOf(raw),
         with_cpu: hasTag(raw, 'with_cpu'),
+        blocked: hasTag(raw, 'blocked'),
         cow: hasTag(raw, 'cow'),
         dnd: hasTag(raw, 'dnd'),
         dab: hasTag(raw, 'dab'),
@@ -319,10 +320,12 @@
 
     // Build the tagged package string. Spoof tags (with_cpu/blocked/cow) are device-only;
     // tweak tags (dnd/dab/kso/nolog) apply to device AND cpu_only (controller comfort toggles).
+    // with_cpu (mount) and blocked (unmount) are mutually exclusive — with_cpu wins if both.
     let finalPkg = cleanName;
     if (type === 'device') {
-      if (form.with_cpu)  finalPkg = addTag(finalPkg, 'with_cpu');
-      if (form.cow)       finalPkg = addTag(finalPkg, 'cow');
+      if (form.with_cpu)       finalPkg = addTag(finalPkg, 'with_cpu');
+      else if (form.blocked)   finalPkg = addTag(finalPkg, 'blocked');
+      if (form.cow)            finalPkg = addTag(finalPkg, 'cow');
     }
     if (type === 'device' || type === 'cpu_only') {
       if (form.dnd)       finalPkg = addTag(finalPkg, 'dnd');

@@ -190,6 +190,7 @@ I18N.register('en', {
 
   /* Package tags (chips) */
   tag_withcpu:  'With CPU',
+  tag_block:    'Block CPU',
   tag_cow:      'COW',
   tag_dnd:      'DND',
   tag_dab:      'Auto-Bright',
@@ -244,6 +245,7 @@ I18N.register('en', {
   pkg_sec_spoofing: 'Spoofing',
   pkg_sec_tweaks:   'Tweaks',
   pkg_t_withcpu:  'With CPU Spoofing',
+  pkg_t_block:    'Block CPU',
   pkg_t_cow:      'COW Prop Spoof',
   pkg_t_dnd:      'Do Not Disturb',
   pkg_t_dab:      'Disable Auto-Brightness',
@@ -255,7 +257,9 @@ I18N.register('en', {
   info_aria:           'What’s this?',
   info_ok:             'Got it',
   info_withcpu_title:  'With CPU Spoofing',
-  info_withcpu_msg:    'On top of faking the device model, this also fakes your phone’s processor (CPU) details for this app. Turn it on for games that check the chipset. Leave it off (the default) and the CPU fake stays blocked — which banking and sensitive apps prefer.',
+  info_withcpu_msg:    'On top of faking the device model, this also fakes your phone’s processor (CPU) details for this app. Turn it on for games that check the chipset. Leave it off and the module leaves the CPU alone — the app sees your real processor.',
+  info_block_title:    'Block CPU',
+  info_block_msg:      'Forces this app to see the REAL processor (CPU) by removing any CPU fake for it. Use it for banking or sensitive apps so a CPU spoof left over from a game can never leak into them. It’s the opposite of With CPU Spoofing, so only one of the two can be on.',
   info_cow_title:      'COW Prop Spoof',
   info_cow_msg:        'Spoofs the device system properties (ro.product.*, ro.build.fingerprint, …) for this app so even its native code sees the fake device. Stealth: the values are written into a private copy-on-write view of the property area and the module unloads before the app runs, so nothing of COPG stays in the app’s memory — safe against anti-cheat memory scans. Use it for games that read props natively.',
   info_dnd_title:      'Do Not Disturb',

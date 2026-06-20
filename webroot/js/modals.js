@@ -139,6 +139,10 @@
             <span class="trow__label"><span data-i18n="pkg_t_withcpu">With CPU Spoofing</span>
               <span class="trow__info" role="button" tabindex="0" data-info="withcpu" data-i18n-attr="aria-label:info_aria" aria-label="What's this?">${INFO_SVG}</span></span>
             <span class="toggle"><input type="checkbox" id="pfWithCpu"><span class="toggle__track"><span class="toggle__thumb"></span></span></span></label>
+          <label class="trow" id="pfBlockRow">
+            <span class="trow__label"><span data-i18n="pkg_t_block">Block CPU</span>
+              <span class="trow__info" role="button" tabindex="0" data-info="block" data-i18n-attr="aria-label:info_aria" aria-label="What's this?">${INFO_SVG}</span></span>
+            <span class="toggle"><input type="checkbox" id="pfBlock"><span class="toggle__track"><span class="toggle__thumb"></span></span></span></label>
           <label class="trow" id="pfCowRow">
             <span class="trow__label"><span data-i18n="pkg_t_cow">COW Prop Spoof</span>
               <span class="trow__info" role="button" tabindex="0" data-info="cow" data-i18n-attr="aria-label:info_aria" aria-label="What's this?">${INFO_SVG}</span></span>
@@ -468,10 +472,11 @@
   // kept name for the existing call sites (preselect on open/edit)
   function populateDeviceSelect(selectedKey) { setDeviceSelection(selectedKey); }
 
-  // Spoof toggles (with_cpu/blocked/got) are device-type only. Tweak toggles
+  // Spoof toggles (with_cpu/block/cow) are device-type only. Tweak toggles
   // (dnd/dab/kso/nolog) apply to device AND cpu_only. 'blocked' type gets neither.
-  const SPOOF_EL = ['pfSpoofHead', 'pfWithCpuRow', 'pfCowRow'];
-  const SPOOF_CB = ['pfWithCpu', 'pfCow'];
+  // with_cpu (mount) and block (unmount) are mutually exclusive — see wiring below.
+  const SPOOF_EL = ['pfSpoofHead', 'pfWithCpuRow', 'pfBlockRow', 'pfCowRow'];
+  const SPOOF_CB = ['pfWithCpu', 'pfBlock', 'pfCow'];
   const TWEAK_EL = ['pfTweakHead', 'pfDndRow', 'pfDabRow', 'pfKsoRow', 'pfNologRow'];
   const TWEAK_CB = ['pfDnd', 'pfDab', 'pfKso', 'pfNolog'];
   function setType(type) {
@@ -501,8 +506,11 @@
     const current = $m('#pfDevice').dataset.deviceKey || null;
     DevicePicker.open(current, sel => setDeviceSelection(sel.pkgKey));
   });
-  // CPU default is BLOCK (unmount) module-side; "With CPU Spoofing" off = block, so no
-  // separate block toggle / mutual-exclusion needed anymore.
+  // CPU spoof is opt-in (v4.7.3): "With CPU Spoofing" mounts the fake cpuinfo,
+  // "Block CPU" unmounts it (forces real cpuinfo even if a global mount leaked).
+  // They're opposite actions → mutually exclusive: turning one on clears the other.
+  $m('#pfWithCpu').addEventListener('change', () => { if ($m('#pfWithCpu').checked) $m('#pfBlock').checked = false; });
+  $m('#pfBlock').addEventListener('change',   () => { if ($m('#pfBlock').checked)   $m('#pfWithCpu').checked = false; });
 
   // COW Prop Spoof is stealth (per-process copy-on-write prop edit, module
   // unloads before the app runs → zero memory residency), so no risk confirm —
@@ -512,6 +520,7 @@
   // stopPropagation so tapping the icon doesn't toggle the row's checkbox.
   const INFO_KEYS = {
     withcpu:  ['info_withcpu_title',  'info_withcpu_msg'],
+    block:    ['info_block_title',    'info_block_msg'],
     cow:      ['info_cow_title',      'info_cow_msg'],
     dnd:      ['info_dnd_title',      'info_dnd_msg'],
     dab:      ['info_dab_title',      'info_dab_msg'],
@@ -541,6 +550,7 @@
       setType(pkg.type);
       populateDeviceSelect(pkg.deviceKey);
       $m('#pfWithCpu').checked  = !!pkg.with_cpu;
+      $m('#pfBlock').checked    = !!pkg.blocked;
       $m('#pfCow').checked      = !!pkg.cow;
       $m('#pfDnd').checked      = !!pkg.dnd;
       $m('#pfDab').checked      = !!pkg.dab;
@@ -584,6 +594,7 @@
     COPG.upsertPackage({
       pkg: raw, name: $m('#pfName').value, type, deviceKey,
       with_cpu: $m('#pfWithCpu').checked,
+      blocked: $m('#pfBlock').checked,
       cow: $m('#pfCow').checked,
       dnd: $m('#pfDnd').checked,
       dab: $m('#pfDab').checked,
