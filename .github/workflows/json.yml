@@ -167,7 +167,7 @@ jobs:
 
       - name: Prepare module structure
         run: |
-          mkdir -p module/zygisk module/webroot/assets module/common
+          mkdir -p module/zygisk module/webroot module/common
 
           # Zygisk Libraries
           cp build/arm64-v8a/libspoof.so module/zygisk/arm64-v8a.so
