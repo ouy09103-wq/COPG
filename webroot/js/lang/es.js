@@ -190,6 +190,7 @@ I18N.register('es', {
 
   /* Package tags (chips) */
   tag_withcpu:  'Con CPU',
+  tag_block:    'Bloquear CPU',
   tag_cow:      'COW',
   tag_dnd:      'No molestar',
   tag_dab:      'Brillo auto',
@@ -243,6 +244,7 @@ I18N.register('es', {
   pkg_sec_spoofing: 'Suplantación',
   pkg_sec_tweaks:   'Ajustes',
   pkg_t_withcpu:  'Con suplantación de CPU',
+  pkg_t_block:    'Bloquear CPU',
   pkg_t_cow:      'Spoof de props COW',
   pkg_t_dnd:      'No molestar',
   pkg_t_dab:      'Desactivar brillo automático',
@@ -255,6 +257,8 @@ I18N.register('es', {
   info_ok:             'Entendido',
   info_withcpu_title:  'Con suplantación de CPU',
   info_withcpu_msg:    'Además de falsear el modelo del dispositivo, esto también falsea los detalles del procesador (CPU) de tu teléfono para esta app. Actívalo para juegos que comprueban el chipset. Déjalo desactivado (por defecto) y la suplantación de CPU queda bloqueada — lo que prefieren las apps bancarias y sensibles.',
+  info_block_title:    'Bloquear CPU',
+  info_block_msg:      'Obliga a esta app a ver el procesador (CPU) REAL eliminando cualquier falsificación de CPU para ella. Útil para apps bancarias o sensibles, para que un spoof de CPU que dejó un juego nunca se filtre a ellas. Es lo contrario de «Con suplantación de CPU», así que solo una de las dos puede estar activada.',
   info_cow_title:      'Spoof de props COW',
   info_cow_msg:        'Falsifica las propiedades del sistema (ro.product.*, ro.build.fingerprint …) para esta app, de modo que incluso su código nativo vea el dispositivo falso. Sigiloso: los valores se escriben en una vista privada copy-on-write del área de propiedades y el módulo se descarga antes de que la app se ejecute — no queda nada de COPG en su memoria, a salvo de los escaneos de memoria anti-trampas. Úsalo para juegos que leen props de forma nativa.',
   info_dnd_title:      'No molestar',

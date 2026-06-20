@@ -190,6 +190,7 @@ I18N.register('de', {
 
   /* Package tags (chips) */
   tag_withcpu:  'Mit CPU',
+  tag_block:    'CPU sperren',
   tag_cow:      'COW',
   tag_dnd:      'Nicht stören',
   tag_dab:      'Auto-Helligkeit',
@@ -243,6 +244,7 @@ I18N.register('de', {
   pkg_sec_spoofing: 'Spoofing',
   pkg_sec_tweaks:   'Optimierungen',
   pkg_t_withcpu:  'Mit CPU-Spoofing',
+  pkg_t_block:    'CPU sperren',
   pkg_t_cow:      'COW-Prop-Spoof',
   pkg_t_dnd:      'Nicht stören',
   pkg_t_dab:      'Auto-Helligkeit deaktivieren',
@@ -255,6 +257,8 @@ I18N.register('de', {
   info_ok:             'Verstanden',
   info_withcpu_title:  'Mit CPU-Spoofing',
   info_withcpu_msg:    'Zusätzlich zum Vortäuschen des Gerätemodells werden auch die Prozessor-Details (CPU) deines Telefons für diese App vorgetäuscht. Aktiviere es für Spiele, die den Chipsatz prüfen. Lass es aus (Standard), dann bleibt das CPU-Spoofing blockiert — was Banking- und sensible Apps bevorzugen.',
+  info_block_title:    'CPU sperren',
+  info_block_msg:      'Zwingt diese App, den ECHTEN Prozessor (CPU) zu sehen, indem jede CPU-Fälschung für sie entfernt wird. Nützlich für Banking- oder sensible Apps, damit eine von einem Spiel übrig gebliebene CPU-Fälschung nie zu ihnen durchsickert. Es ist das Gegenteil von „Mit CPU-Spoofing“, daher kann nur eine der beiden Optionen aktiv sein.',
   info_cow_title:      'COW-Prop-Spoof',
   info_cow_msg:        'Fälscht die System-Properties des Geräts (ro.product.*, ro.build.fingerprint …) für diese App, sodass selbst ihr nativer Code das gefälschte Gerät sieht. Stealth: Die Werte werden in eine private Copy-on-Write-Ansicht des Property-Bereichs geschrieben, und das Modul entlädt sich vor dem App-Start — nichts von COPG bleibt im Speicher der App, sicher gegen Anti-Cheat-Speicherscans. Für Spiele, die Properties nativ lesen.',
   info_dnd_title:      'Nicht stören',

@@ -190,6 +190,7 @@ I18N.register('zh', {
 
   /* Package tags (chips) */
   tag_withcpu:  '含 CPU',
+  tag_block:    '屏蔽 CPU',
   tag_cow:      'COW',
   tag_dnd:      '勿扰',
   tag_dab:      '自动亮度',
@@ -243,6 +244,7 @@ I18N.register('zh', {
   pkg_sec_spoofing: '伪装',
   pkg_sec_tweaks:   '微调',
   pkg_t_withcpu:  '伪装 CPU',
+  pkg_t_block:    '屏蔽 CPU',
   pkg_t_cow:      'COW 属性伪装',
   pkg_t_dnd:      '勿扰模式',
   pkg_t_dab:      '关闭自动亮度',
@@ -255,6 +257,8 @@ I18N.register('zh', {
   info_ok:             '知道了',
   info_withcpu_title:  '伪装 CPU',
   info_withcpu_msg:    '在伪装设备型号之外，这还会为此应用伪装手机的处理器 (CPU) 信息。对于会检查芯片的游戏请开启。保持关闭（默认）则 CPU 伪装被屏蔽——银行和敏感应用更喜欢这样。',
+  info_block_title:    '屏蔽 CPU',
+  info_block_msg:      '通过移除针对此应用的任何 CPU 伪装，强制它看到真实的处理器（CPU）。适用于银行或敏感应用，使游戏残留的 CPU 伪装永远不会泄漏到它们。它与「使用 CPU 伪装」相反，因此两者只能启用其一。',
   info_cow_title:      'COW 属性伪装',
   info_cow_msg:        '为此应用伪造设备系统属性（ro.product.*、ro.build.fingerprint 等），让其原生代码也看到伪造的设备。隐身：数值写入属性区域的私有写时复制视图，且模块在应用运行前卸载——应用内存中不留任何 COPG 痕迹，可抵御反作弊的内存扫描。适用于以原生方式读取属性的游戏。',
   info_dnd_title:      '勿扰模式',

@@ -190,6 +190,7 @@ I18N.register('id', {
 
   /* Package tags (chips) */
   tag_withcpu:  'Dengan CPU',
+  tag_block:    'Blokir CPU',
   tag_cow:      'COW',
   tag_dnd:      'DND',
   tag_dab:      'Cerah Auto',
@@ -243,6 +244,7 @@ I18N.register('id', {
   pkg_sec_spoofing: 'Pemalsuan',
   pkg_sec_tweaks:   'Penyesuaian',
   pkg_t_withcpu:  'Dengan Pemalsuan CPU',
+  pkg_t_block:    'Blokir CPU',
   pkg_t_cow:      'Spoof Prop COW',
   pkg_t_dnd:      'Jangan Ganggu',
   pkg_t_dab:      'Matikan Kecerahan Otomatis',
@@ -255,6 +257,8 @@ I18N.register('id', {
   info_ok:             'Mengerti',
   info_withcpu_title:  'Dengan Pemalsuan CPU',
   info_withcpu_msg:    'Selain memalsukan model perangkat, ini juga memalsukan detail prosesor (CPU) ponselmu untuk aplikasi ini. Aktifkan untuk game yang memeriksa chipset. Biarkan mati (bawaan) dan pemalsuan CPU tetap diblokir — yang disukai aplikasi perbankan dan sensitif.',
+  info_block_title:    'Blokir CPU',
+  info_block_msg:      'Memaksa aplikasi ini melihat prosesor (CPU) ASLI dengan menghapus pemalsuan CPU untuknya. Berguna untuk aplikasi perbankan atau sensitif, agar spoof CPU sisa dari game tidak pernah bocor ke aplikasi tersebut. Ini kebalikan dari "Dengan Spoof CPU", jadi hanya satu dari keduanya yang bisa aktif.',
   info_cow_title:      'Spoof Prop COW',
   info_cow_msg:        'Memalsukan properti sistem perangkat (ro.product.*, ro.build.fingerprint …) untuk aplikasi ini sehingga bahkan kode native-nya melihat perangkat palsu. Stealth: nilai ditulis ke tampilan copy-on-write privat dari area properti dan modul dibongkar sebelum aplikasi berjalan — tidak ada jejak COPG di memori aplikasi, aman dari pemindaian memori anti-cheat. Gunakan untuk game yang membaca props secara native.',
   info_dnd_title:      'Jangan Ganggu',
