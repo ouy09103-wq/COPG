@@ -123,7 +123,6 @@
           <div class="seg" id="pfType">
             <button type="button" class="seg__opt active" data-type="device"   data-i18n="pkgtype_device">Device</button>
             <button type="button" class="seg__opt"        data-type="cpu_only"  data-i18n="pkgtype_cpu_only">CPU Only</button>
-            <button type="button" class="seg__opt"        data-type="blocked"   data-i18n="pkgtype_blocked">Blocked</button>
           </div>
         </div>
 
@@ -468,8 +467,8 @@
   // kept name for the existing call sites (preselect on open/edit)
   function populateDeviceSelect(selectedKey) { setDeviceSelection(selectedKey); }
 
-  // Spoof toggles (with_cpu/blocked/got) are device-type only. Tweak toggles
-  // (dnd/dab/kso/nolog) apply to device AND cpu_only. 'blocked' type gets neither.
+  // Spoof toggles (with_cpu/cow) are device-type only. Tweak toggles
+  // (dnd/dab/kso/nolog) apply to device AND cpu_only.
   const SPOOF_EL = ['pfSpoofHead', 'pfWithCpuRow', 'pfCowRow'];
   const SPOOF_CB = ['pfWithCpu', 'pfCow'];
   const TWEAK_EL = ['pfTweakHead', 'pfDndRow', 'pfDabRow', 'pfKsoRow', 'pfNologRow'];

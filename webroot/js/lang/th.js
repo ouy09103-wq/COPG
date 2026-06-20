@@ -134,7 +134,6 @@ I18N.register('th', {
   filter_user:     'ผู้ใช้',
   filter_system:   'ระบบ',
   filter_installed:'ติดตั้งแล้ว',
-  filter_blocked:  'ถูกบล็อก',
   filter_cpu_only: 'CPU',
 
   /* App picker */
@@ -186,7 +185,6 @@ I18N.register('th', {
   /* Package types (chips) */
   pkgtype_device:   'อุปกรณ์',
   pkgtype_cpu_only: 'ปลอม CPU',
-  pkgtype_blocked:  'บล็อกการปลอม CPU',
 
   /* Package tags (chips) */
   tag_withcpu:  'พร้อม CPU',

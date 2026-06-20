@@ -134,7 +134,6 @@ I18N.register('ar', {
   filter_user:     'مستخدم',
   filter_system:   'نظام',
   filter_installed:'مثبّت',
-  filter_blocked:  'محظور',
   filter_cpu_only: 'المعالج',
 
   /* App picker */
@@ -186,7 +185,6 @@ I18N.register('ar', {
   /* Package types (chips) */
   pkgtype_device:   'جهاز',
   pkgtype_cpu_only: 'انتحال المعالج',
-  pkgtype_blocked:  'حظر انتحال المعالج',
 
   /* Package tags (chips) */
   tag_withcpu:  'مع المعالج',

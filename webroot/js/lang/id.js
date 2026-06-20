@@ -134,7 +134,6 @@ I18N.register('id', {
   filter_user:     'Pengguna',
   filter_system:   'Sistem',
   filter_installed:'Terpasang',
-  filter_blocked:  'Diblokir',
   filter_cpu_only: 'CPU',
 
   /* App picker */
@@ -186,7 +185,6 @@ I18N.register('id', {
   /* Package types (chips) */
   pkgtype_device:   'Perangkat',
   pkgtype_cpu_only: 'Palsukan CPU',
-  pkgtype_blocked:  'Blokir Palsu CPU',
 
   /* Package tags (chips) */
   tag_withcpu:  'Dengan CPU',

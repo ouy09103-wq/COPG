@@ -1,8 +1,5 @@
 {
   "cpu_spoof": {
-    "blacklist": [
-      "com.bbl.mobilebanking"
-    ],
     "cpu_only_packages": [
       "com.epicgames.fortnite",
       "com.miraclegames.farlight84"
