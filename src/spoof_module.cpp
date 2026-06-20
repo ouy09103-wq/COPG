@@ -595,12 +595,16 @@ private:
         // has zero Zygisk effect. Do NOT turn this into an exhaustive switch/else that
         // would choke on unknown tags.
         //
-        // CPU default = BLOCK (unmount). Only 'with_cpu' opts into mounting the CPU spoof.
-        // So a package with no tag now unmounts (safe default); the old 'blocked' tag is
-        // retired — it behaves identically to no tag.
+        // CPU spoof is OPT-IN (v4.7.3 semantics): 'with_cpu' mounts the fake cpuinfo,
+        // an explicit 'blocked' tag unmounts it, and EVERYTHING ELSE does nothing.
+        // (Blacklisted packages also unmount — checked separately at the call site.)
+        // The v5.1.x "default = block" set needs_cpu_unmount for every non-with_cpu
+        // package in a device list, so each of those apps issued a global
+        // `umount /proc/cpuinfo` that raced the with_cpu mounts (~50% clobber).
+        // Opt-in kills that race: an untagged app never touches the mount.
         if (tags.find("with_cpu") != tags.end()) {
             flags.needs_cpu_mount = true;
-        } else {
+        } else if (tags.find("blocked") != tags.end()) {
             flags.needs_cpu_unmount = true;
         }
         if (tags.find("cow") != tags.end()) {
