@@ -134,6 +134,7 @@ I18N.register('fa', {
   filter_user:     'کاربر',
   filter_system:   'سیستم',
   filter_installed:'نصب‌شده',
+  filter_blocked:  'مسدود',
   filter_cpu_only: 'CPU',
 
   /* App picker */
@@ -185,6 +186,7 @@ I18N.register('fa', {
   /* Package types (chips) */
   pkgtype_device:   'دستگاه',
   pkgtype_cpu_only: 'جعل CPU',
+  pkgtype_blocked:  'مسدودسازی جعل CPU',
 
   /* Package tags (chips) */
   tag_withcpu:  'با جعل CPU',

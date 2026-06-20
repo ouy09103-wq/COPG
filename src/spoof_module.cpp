@@ -42,8 +42,6 @@
 #include <thread>
 #include <atomic>
 #include <sys/system_properties.h>
-#include <sched.h>        // unshare, CLONE_NEWNS
-#include <sys/mount.h>    // mount, MS_BIND / MS_REC / MS_PRIVATE
 
 using json = nlohmann::json;
 
@@ -57,6 +55,7 @@ using json = nlohmann::json;
 
 #define CONFIG_LOG(...) LOGI("[CONFIG] " __VA_ARGS__)
 #define SPOOF_LOG(...) LOGI("[SPOOF] " __VA_ARGS__)
+#define COMPANION_LOG(...) LOGI("[COMPANION] " __VA_ARGS__)
 #define PKG_LOG(...) LOGI("[PKG] " __VA_ARGS__)
 
 #if defined(__aarch64__) || defined(__x86_64__)
@@ -100,6 +99,7 @@ struct DeviceInfo {
 struct PackageFlags {
     bool needs_device_spoof = false;
     bool needs_cpu_mount = false;    // with_cpu
+    bool needs_cpu_unmount = false;  // blocked
     bool needs_cow = false;          // cow → stealth COW prop spoof
 };
 
@@ -143,8 +143,8 @@ static jfieldID extraBuildFieldIds[EXTRA_BUILD_COUNT] = { nullptr };
 static time_t last_config_mtime = 0;
 static const std::string config_path = "/data/adb/modules/COPG/COPG.json";
 static const char* spoof_file_path = "/data/adb/modules/COPG/cpuinfo_spoof";
-// (cpu_blacklist removed — "block" is now passive: no with_cpu tag = no mount = real cpuinfo)
 
+static std::unordered_set<std::string> cpu_blacklist;
 static std::unordered_set<std::string> cpu_only_packages;
 
 struct JniString {
@@ -188,44 +188,35 @@ static bool ipc_readU64(int fd, uint64_t& v) {
 
 
 // ─────────────────────────────────────────
-// In-app PRIVATE cpuinfo spoof (preAppSpecialize, zero residency)
+// Companion (runs as root)
 // ─────────────────────────────────────────
-// Runs INSIDE the app process while it's still root (CAP_SYS_ADMIN not yet
-// dropped by specialize). It unshares its OWN mount namespace, detaches mount
-// propagation, then bind-mounts the spoof file over /proc/cpuinfo so that ONLY
-// this app sees it. No companion, no GLOBAL mount.
-//
-// Why this replaced the old companion `mount --bind` (the ~50% bug): the old
-// mount was global/shared, created in preAppSpecialize BEFORE the app unshares.
-// Every non-`with_cpu` configured app issued a global `umount /proc/cpuinfo`
-// (CPU default = block), which raced against and clobbered a with_cpu app's
-// mount during its pre→specialize window → the spoof landed only ~half the time.
-// A per-app private mount can't be touched by any other process, so it's
-// deterministic, and "block" needs no umount at all (an untagged app simply
-// doesn't mount → sees the real cpuinfo). Android's later specialize copies this
-// already-mounted view, so the bind survives. The module DLCLOSEs right after —
-// the mount is a kernel object and persists with nothing of COPG left mapped.
-static bool spoofCpuinfoPrivate() {
-    if (access(spoof_file_path, F_OK) != 0) {
-        LOGI("[CPU] spoof file missing: %s", spoof_file_path);
-        return false;
+static void companion(int fd) {
+    COMPANION_LOG("Started");
+    char buffer[2048];
+    ssize_t bytes = read(fd, buffer, sizeof(buffer)-1);
+    
+    if (bytes > 0) {
+        buffer[bytes] = '\0';
+        std::string command = buffer;
+        
+        if (command == "unmount_spoof" || command == "mount_spoof") {
+            int result = -1;
+            if (command == "unmount_spoof") {
+                result = system("/system/bin/umount /proc/cpuinfo 2>/dev/null");
+                COMPANION_LOG("CPU unmount");
+            } else {
+                if (access(spoof_file_path, F_OK) == 0) {
+                    system("/system/bin/umount /proc/cpuinfo 2>/dev/null");
+                    char mount_cmd[512];
+                    snprintf(mount_cmd, sizeof(mount_cmd), "/system/bin/mount --bind %s /proc/cpuinfo", spoof_file_path);
+                    result = system(mount_cmd);
+                    COMPANION_LOG("CPU mount");
+                }
+            }
+            write(fd, &result, sizeof(result));
+        }
     }
-    // 1) Private mount namespace for this process only.
-    if (unshare(CLONE_NEWNS) != 0) {
-        LOGI("[CPU] unshare(CLONE_NEWNS) failed: %s", strerror(errno));
-        return false;
-    }
-    // 2) Detach propagation so our bind never leaks out to other apps / global ns.
-    if (mount(nullptr, "/", nullptr, MS_REC | MS_PRIVATE, nullptr) != 0) {
-        LOGI("[CPU] make-rprivate / failed (continuing): %s", strerror(errno));
-    }
-    // 3) Bind the fake cpuinfo over the real one — visible only in this ns.
-    if (mount(spoof_file_path, "/proc/cpuinfo", nullptr, MS_BIND, nullptr) != 0) {
-        LOGI("[CPU] bind mount /proc/cpuinfo failed: %s", strerror(errno));
-        return false;
-    }
-    LOGI("[CPU] private cpuinfo spoof mounted (per-app, no race)");
-    return true;
+    close(fd);
 }
 
 // ─────────────────────────────────────────
@@ -470,8 +461,14 @@ public:
                 }
             }
 
-            // cpu_only: CPU spoof without a device profile.
+            // Check blacklist and cpu_only
+            bool is_blacklisted = (cpu_blacklist.find(package_name) != cpu_blacklist.end());
             bool is_cpu_only = (cpu_only_packages.find(package_name) != cpu_only_packages.end());
+
+            if (is_blacklisted) {
+                found_in_config = true;
+                flags.needs_cpu_unmount = true;
+            }
 
             if (is_cpu_only && !found_in_config) {
                 found_in_config = true;
@@ -503,13 +500,10 @@ public:
                 }
             }
 
-            // CPU spoof — per-app PRIVATE mount, in this process, in pre (see
-            // spoofCpuinfoPrivate). `with_cpu` → mount the fake just for this app.
-            // Default = block: do NOTHING (no global umount → no race; an untagged
-            // app simply sees the real /proc/cpuinfo). The old global mount/unmount
-            // via companion is retired (it caused the ~50% clobber).
-            if (flags.needs_cpu_mount) {
-                spoofCpuinfoPrivate();
+            if (flags.needs_cpu_unmount) {
+                executeCompanionCommand("unmount_spoof");
+            } else if (flags.needs_cpu_mount) {
+                executeCompanionCommand("mount_spoof");
             }
         }
 
@@ -601,18 +595,29 @@ private:
         // has zero Zygisk effect. Do NOT turn this into an exhaustive switch/else that
         // would choke on unknown tags.
         //
-        // 'with_cpu' → mount the per-app private cpuinfo spoof (spoofCpuinfoPrivate).
-        // No tag = no mount = the app sees the REAL /proc/cpuinfo — that IS the "block"
-        // default now, passive (no global umount, no race). The old 'blocked' tag and
-        // the cpu_spoof.blacklist are retired: both behave identically to no tag.
+        // CPU default = BLOCK (unmount). Only 'with_cpu' opts into mounting the CPU spoof.
+        // So a package with no tag now unmounts (safe default); the old 'blocked' tag is
+        // retired — it behaves identically to no tag.
         if (tags.find("with_cpu") != tags.end()) {
             flags.needs_cpu_mount = true;
+        } else {
+            flags.needs_cpu_unmount = true;
         }
         if (tags.find("cow") != tags.end()) {
             flags.needs_cow = true;
         }
 
         return flags;
+    }
+
+    bool executeCompanionCommand(const std::string& command) {
+        auto fd = api->connectCompanion();
+        if (fd < 0) return false;
+        write(fd, command.c_str(), command.size());
+        int result = -1;
+        read(fd, &result, sizeof(result));
+        close(fd);
+        return result == 0;
     }
 
     void ensureBuildClass() {
@@ -679,10 +684,14 @@ private:
             // ✅ CORRECT: DeviceInfo + map of package_name -> PackageFlags
             std::vector<std::pair<DeviceInfo, std::unordered_map<std::string, PackageFlags>>> new_device_packages;
             
+            cpu_blacklist.clear();
             cpu_only_packages.clear();
-
+            
             if (config.contains("cpu_spoof")) {
                 auto cpu_spoof_config = config["cpu_spoof"];
+                if (cpu_spoof_config.contains("blacklist")) {
+                    for (const auto& pkg : cpu_spoof_config["blacklist"]) cpu_blacklist.insert(pkg.get<std::string>());
+                }
                 if (cpu_spoof_config.contains("cpu_only_packages")) {
                     // entries may carry controller tweak tags (dnd/dab/kso/nolog) — strip them;
                     // we only need the clean package name for cpu-only matching.
@@ -791,7 +800,7 @@ private:
             }
 
             last_config_mtime = current_mtime;
-            CONFIG_LOG("Loaded: %d devices, %zu cpu_only", device_count, cpu_only_packages.size());
+            CONFIG_LOG("Loaded: %d devices, %zu cpu_only, %zu blacklist", device_count, cpu_only_packages.size(), cpu_blacklist.size());
         } catch (const std::exception& e) {
             LOGE("Config error: %s", e.what());
         }
@@ -843,4 +852,4 @@ private:
 };
 
 REGISTER_ZYGISK_MODULE(COPGModule)
-// No companion: CPU spoof is now a pure in-process mount (spoofCpuinfoPrivate).
+REGISTER_ZYGISK_COMPANION(companion)

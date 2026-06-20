@@ -134,6 +134,7 @@ I18N.register('zh', {
   filter_user:     '用户',
   filter_system:   '系统',
   filter_installed:'已安装',
+  filter_blocked:  '已屏蔽',
   filter_cpu_only: 'CPU',
 
   /* App picker */
@@ -185,6 +186,7 @@ I18N.register('zh', {
   /* Package types (chips) */
   pkgtype_device:   '设备',
   pkgtype_cpu_only: 'CPU 伪装',
+  pkgtype_blocked:  '屏蔽 CPU 伪装',
 
   /* Package tags (chips) */
   tag_withcpu:  '含 CPU',

@@ -134,6 +134,7 @@ I18N.register('en', {
   filter_user:     'User',
   filter_system:   'System',
   filter_installed:'Installed',
+  filter_blocked:  'Blocked',
   filter_cpu_only: 'CPU',
 
   /* App picker */
@@ -185,6 +186,7 @@ I18N.register('en', {
   /* Package types (chips) */
   pkgtype_device:   'Device',
   pkgtype_cpu_only: 'CPU Spoof',
+  pkgtype_blocked:  'Block CPU Spoof',
 
   /* Package tags (chips) */
   tag_withcpu:  'With CPU',

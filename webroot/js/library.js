@@ -10,7 +10,7 @@ const LibQuery = {
   devices: '', packages: '',
   devSort: 'default',  // default | name | apps | brand
   pkgSort: 'default',  // default | name | type | installed
-  pkgFilter: 'all',    // all | installed | cpu_only
+  pkgFilter: 'all',    // all | installed | blocked | cpu_only
 };
 
 const installedSet = () => (window.COPG && COPG.installedSet) ? COPG.installedSet : new Set();
@@ -76,6 +76,7 @@ function pkgMatchesFilter(p) {
   const set = installedSet();
   switch (LibQuery.pkgFilter) {
     case 'installed': return set.has(p.clean);
+    case 'blocked':   return p.type === 'blocked';
     case 'cpu_only':  return p.type === 'cpu_only';
     default:          return true;
   }
@@ -169,11 +170,12 @@ function renderPackages() {
     card.querySelector('.package-card__pkg').textContent = pkg.clean;
 
     // Dim text ABOVE the name (same slot/style as the device model): the device
-    // name for device packages, or the spoof type for cpu_only.
+    // name for device packages, or the spoof type for cpu_only / blocked.
     const devEl = card.querySelector('.package-card__device');
     let aboveText = '';
     if (pkg.type === 'device')        aboveText = pkg.deviceName || '';
     else if (pkg.type === 'cpu_only') aboveText = I18N.t('pkgtype_cpu_only');   // "CPU Spoof"
+    else if (pkg.type === 'blocked')  aboveText = I18N.t('pkgtype_blocked');    // "Block CPU Spoof"
     if (aboveText) devEl.textContent = aboveText;
     else devEl.remove();
 
@@ -307,6 +309,7 @@ function buildControls() {
         <div class="lib-filters">
           <button class="fchip active" data-filter="all" data-i18n="filter_all">All</button>
           <button class="fchip" data-filter="installed" data-i18n="filter_installed">Installed</button>
+          <button class="fchip" data-filter="blocked" data-i18n="filter_blocked">Blocked</button>
           <button class="fchip" data-filter="cpu_only" data-i18n="filter_cpu_only">CPU</button>
         </div>`);
 

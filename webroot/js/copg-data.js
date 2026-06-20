@@ -3,15 +3,15 @@
    (bridge + parse + model + persistence; no DOM)
 
    COPG.json shape (shared with zygisk/binaries):
-     "cpu_spoof": { cpu_only_packages:[pkg…] }                     // global, optional
-     "PACKAGES_<KEY>":        [ "com.x:with_cpu", "com.y:cow" ]    // a device's game list
+     "cpu_spoof": { blacklist:[pkg…], cpu_only_packages:[pkg…] }   // global, optional
+     "PACKAGES_<KEY>":        [ "com.x:blocked", "com.y:with_cpu" ] // a device's game list
      "PACKAGES_<KEY>_DEVICE": { BRAND, DEVICE, MANUFACTURER, MODEL,
                                 FINGERPRINT, PRODUCT, SERIAL?, ANDROID_ID?, ANDROID_VERSION?, SDK_INT?,
                                 // optional extra Build fields (JNI + COW), all strings:
                                 BOARD?, HARDWARE?, DISPLAY?, ID?, BOOTLOADER?, TAGS?, TYPE?,
                                 SECURITY_PATCH?, INCREMENTAL?, CODENAME?, SOC_MANUFACTURER?, SOC_MODEL? }
    Insertion order of keys is meaningful and preserved on save (keyOrder).
-   Package tags are colon suffixes: pkg:with_cpu, pkg:cow.
+   Package tags are colon suffixes: pkg:blocked, pkg:with_cpu, pkg:cow.
    Logic ported from the previous WebUI (old.js) for full parity.
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 (function (w) {
@@ -137,7 +137,6 @@
     catch (_) { config = {}; }
     try { names = listText ? JSON.parse(listText) : {}; }
     catch (_) { names = {}; }
-    if (config.cpu_spoof) delete config.cpu_spoof.blacklist;  // legacy block list, retired
     keyOrder = Object.keys(config);
     return { ok: true };
   }
@@ -166,7 +165,7 @@
   }
 
   /* Flat package list across devices + cpu_spoof, deduped by clean name.
-     Order: cpu_only, then device lists. */
+     Order mirrors old.js render: blocklist, then cpu_only, then device lists. */
   function listPackages() {
     const out = [];
     const seen = new Set();
@@ -188,6 +187,7 @@
       });
     };
     const cpu = config.cpu_spoof || {};
+    (cpu.blacklist || []).forEach(p => push(p, 'blocked'));
     (cpu.cpu_only_packages || []).forEach(p => push(p, 'cpu_only'));
     for (const key of keyOrder) {
       if (key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE') && Array.isArray(config[key])) {
@@ -203,6 +203,7 @@
   function locate(cleanName, ignoreClean) {
     if (ignoreClean === cleanName) return '';
     const cpu = config.cpu_spoof || {};
+    if ((cpu.blacklist || []).some(p => clean(p) === cleanName)) return 'blocklist';
     if ((cpu.cpu_only_packages || []).some(p => clean(p) === cleanName)) return 'CPU only list';
     for (const key of keyOrder) {
       if (key.startsWith('PACKAGES_') && !key.endsWith('_DEVICE') && Array.isArray(config[key])) {
@@ -226,9 +227,10 @@
   /* ─── Device mutations (ported from old.js saveDevice / deleteDevice) ─── */
   function ensureCpuSpoof() {
     if (!config.cpu_spoof) {
-      config.cpu_spoof = { cpu_only_packages: [] };
+      config.cpu_spoof = { blacklist: [], cpu_only_packages: [] };
       if (!keyOrder.includes('cpu_spoof')) keyOrder.unshift('cpu_spoof');
     }
+    if (!Array.isArray(config.cpu_spoof.blacklist)) config.cpu_spoof.blacklist = [];
     if (!Array.isArray(config.cpu_spoof.cpu_only_packages)) config.cpu_spoof.cpu_only_packages = [];
   }
 
@@ -298,7 +300,7 @@
   }
 
   /* ─── Package mutations (ported from old.js saveGame / deleteGame) ─── */
-  /* form: { pkg (may include tags as typed), name, type:'device'|'cpu_only',
+  /* form: { pkg (may include tags as typed), name, type:'device'|'cpu_only'|'blocked',
             deviceKey (PACKAGES_…_DEVICE when type=device), with_cpu, cow,
             dnd, dab, kso, nolog }
      editing: { clean, type, deviceKey } | null  */
@@ -315,7 +317,7 @@
     if (editing && editing.clean && editing.clean !== cleanName) delete names[editing.clean];
     names[cleanName] = displayName;
 
-    // Build the tagged package string. Spoof tags (with_cpu/cow) are device-only;
+    // Build the tagged package string. Spoof tags (with_cpu/blocked/cow) are device-only;
     // tweak tags (dnd/dab/kso/nolog) apply to device AND cpu_only (controller comfort toggles).
     let finalPkg = cleanName;
     if (type === 'device') {
@@ -336,7 +338,8 @@
     // Remember original position to preserve order on in-place edit
     let origPos = -1, origList = null;
     if (editing) {
-      if (oldType === 'cpu_only') { origPos = cpu.cpu_only_packages.findIndex(p => clean(p) === oldClean); origList = 'cpu_only'; }
+      if (oldType === 'blocked')  { origPos = cpu.blacklist.findIndex(p => clean(p) === oldClean); origList = 'blocked'; }
+      else if (oldType === 'cpu_only') { origPos = cpu.cpu_only_packages.findIndex(p => clean(p) === oldClean); origList = 'cpu_only'; }
       else if (oldType === 'device' && oldDevKey && Array.isArray(config[oldDevKey])) {
         origPos = config[oldDevKey].findIndex(p => clean(p) === oldClean); origList = oldDevKey;
       }
@@ -344,7 +347,9 @@
 
     // Remove from previous home if type/device changed
     if (oldClean) {
+      const bi = cpu.blacklist.findIndex(p => clean(p) === oldClean);
       const ci = cpu.cpu_only_packages.findIndex(p => clean(p) === oldClean);
+      if (bi !== -1 && type !== 'blocked')  cpu.blacklist.splice(bi, 1);
       if (ci !== -1 && type !== 'cpu_only') cpu.cpu_only_packages.splice(ci, 1);
       if (oldDevKey && (type !== 'device' || oldDevKey !== newPkgKey) && Array.isArray(config[oldDevKey])) {
         const oi = config[oldDevKey].findIndex(p => clean(p) === oldClean);
@@ -372,6 +377,12 @@
       if (ex !== -1) arr.splice(ex, 1);
       if (origList === 'cpu_only' && origPos !== -1) arr.splice(origPos, 0, finalPkg);
       else arr.push(finalPkg);
+    } else if (type === 'blocked') {
+      const arr = cpu.blacklist;
+      const ex = arr.findIndex(p => clean(p) === cleanName);
+      if (ex !== -1) arr.splice(ex, 1);
+      if (origList === 'blocked' && origPos !== -1) arr.splice(origPos, 0, cleanName);
+      else arr.push(cleanName);
     }
     return { clean: cleanName };
   }
@@ -379,7 +390,10 @@
   function deletePackage(cleanName, type, deviceKey) {
     ensureCpuSpoof();
     const cpu = config.cpu_spoof;
-    if (type === 'cpu_only') {
+    if (type === 'blocked') {
+      const i = cpu.blacklist.findIndex(p => clean(p) === cleanName);
+      if (i !== -1) cpu.blacklist.splice(i, 1);
+    } else if (type === 'cpu_only') {
       const i = cpu.cpu_only_packages.findIndex(p => clean(p) === cleanName);
       if (i !== -1) cpu.cpu_only_packages.splice(i, 1);
     } else if (type === 'device' && deviceKey && Array.isArray(config[deviceKey])) {
@@ -461,7 +475,6 @@
 
   function applyConfigObject(obj) {
     config = isPlainObject(obj) ? obj : {};
-    if (config.cpu_spoof) delete config.cpu_spoof.blacklist;  // legacy block list, retired
     keyOrder = Object.keys(config);
   }
   function applyNamesObject(obj) { names = isPlainObject(obj) ? obj : {}; }
