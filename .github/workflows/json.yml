@@ -295,15 +295,23 @@ jobs:
           RELEASE_NOTES+="**Commit**: ${{ github.sha }}\n\n"
           RELEASE_NOTES+="Read the full changelog for all versions in [changelog.md](https://github.com/${{ github.repository }}/blob/${{ github.event.inputs.branch }}/changelog.md)"
           
-          echo "Creating release $TAG..."
           echo -e "$RELEASE_NOTES" > release_notes.txt
-          
-          gh release create "$TAG" \
-            --title "COPG v${{ env.VERSION }}" \
-            --notes-file release_notes.txt \
-            ${{ env.ZIP_NAME }}
-          
-          echo "✅ Release created successfully!"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists — updating notes + re-uploading asset..."
+            gh release edit "$TAG" \
+              --title "COPG v${{ env.VERSION }}" \
+              --notes-file release_notes.txt
+            gh release upload "$TAG" ${{ env.ZIP_NAME }} --clobber
+          else
+            echo "Creating release $TAG..."
+            gh release create "$TAG" \
+              --title "COPG v${{ env.VERSION }}" \
+              --notes-file release_notes.txt \
+              ${{ env.ZIP_NAME }}
+          fi
+
+          echo "✅ Release published successfully!"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -400,9 +408,18 @@ jobs:
                                   content_html += "<ul>"
                                   in_list = True
                               list_item = line[1:].strip()
+                              # Stash code spans FIRST so any * inside them (e.g. `Build.*`,
+                              # `ro.*`) is not paired by the emphasis regexes — otherwise a
+                              # lone * inside a backtick span gets matched as italic across a
+                              # </code>/<b> boundary and Telegraph rejects the overlapping tags.
+                              code_spans = []
+                              def _stash(m):
+                                  code_spans.append(m.group(1))
+                                  return f"\x00{len(code_spans) - 1}\x00"
+                              list_item = re.sub(r'`(.*?)`', _stash, list_item)
                               list_item = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', list_item)
                               list_item = re.sub(r'\*(.*?)\*', r'<i>\1</i>', list_item)
-                              list_item = re.sub(r'`(.*?)`', r'<code>\1</code>', list_item)
+                              list_item = re.sub(r'\x00(\d+)\x00', lambda m: f"<code>{code_spans[int(m.group(1))]}</code>", list_item)
                               content_html += f"<li>{list_item}</li>"
                           else:
                               if in_list:
