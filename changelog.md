@@ -4,6 +4,27 @@
 #### **Telegram Channel**:
 - https://t.me/COPG_module
 ---
+## v5.3.0
+### New Stealth Spoofing Engine
+*   **COW prop spoof replaces GOT hooking.** The old method left a chunk of COPG's code mapped in the game's memory (detectable). The new **`cow` tag** edits device props (`ro.product.*`, fingerprint, and any custom prop) through a per-process copy-on-write page and then **unloads the module before the app runs** — so an anti-cheat scanning memory finds **nothing of COPG mapped**. Same effect, far stealthier. Only your app sees the fake; the system and other apps are untouched.
+*   **ANDROID_ID spoofing (no reboot).** Set a per-device `ANDROID_ID` and apps read the fake value with **no reboot and no detectable hook** — the value is planted in the in-process settings cache. New field in the device editor with a **Generate** button.
+*   **Serial spoofing.** Optional `Build.SERIAL` + `ro.serialno` per device, also with a Generate button.
+
+### More Build Fields
+*   **12 extra Build identifiers** can now be faked per device — `BOARD, HARDWARE, DISPLAY, ID, BOOTLOADER, TAGS, TYPE, SOC_MANUFACTURER, SOC_MODEL, SECURITY_PATCH, INCREMENTAL, CODENAME` — set both as `Build.*` fields **and** their matching `ro.*` props. They live in a collapsible **Advanced build props** group in the device editor, all with example placeholders.
+
+### CPU Spoof — Reliable Every Launch
+*   **Fixed the ~50% CPU-spoof failure.** The fake `cpuinfo` is now mounted **inside each game's own process**, in a private mount namespace, instead of through a shared root helper that raced against the per-app block logic. It now lands **every launch**, deterministically. (Per-app only — system and other apps still see the real CPU.)
+*   **Removed the Zygisk companion entirely.** CPU spoofing is pure in-process C++ now — one less moving part, nothing extra mapped in the game's memory.
+
+### WebUI & Cleanup
+*   **Removed the "Blocked" package type / block list.** Redundant — leaving **With CPU Spoofing** off already blocks the CPU fake (the default). The Type picker is now just **Device** and **CPU Only**.
+*   **Keyboard-aware editor sheets** — forms lift above the on-screen keyboard instead of hiding behind it.
+*   **Example placeholders** on every device/package field (a coherent Pixel 8 Pro set) so the expected format is obvious.
+*   Editing a device now **merges** over the saved profile instead of rebuilding it, preserving advanced keys.
+*   Fixed the bottom navigation / ripple rendering off-center on tablets and wide screens.
+
+---
 ## v5.1.1
 ### Fully Systemless — no /system mount, no metamodule
 *   **No metamodule needed.** COPG no longer touches `/system` at all, so on newer KernelSU you **no longer need the system-overlay metamodule** — it installs and runs as a plain module on KernelSU / Magisk / APatch.
