@@ -1,7 +1,9 @@
 {
+    "modId": "COPG",
     "title": "COPG",
     "icon": "icon.png",
     "backHandler": false,
-    "contentSecurityPolicy": "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; connect-src *",
-    "windowResize": false
+    "contentSecurityPolicy": "domain-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; connect-src *",
+    "windowResize": false,
+    "killShellWhenBackground": false
 }
