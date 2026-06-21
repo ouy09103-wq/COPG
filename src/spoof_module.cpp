@@ -428,6 +428,21 @@ public:
         }
 
         PKG_LOG("Processing: %s", package_name);
+
+        // Child processes carry a ":proc" suffix on the nice_name (e.g.
+        // com.mobile.legends:UnityKillsMe — the Unity/il2cpp engine process where
+        // the game ACTUALLY reads Build.* / props, while the main process is just a
+        // launcher shell). Config keys are clean base package names, so match on the
+        // base (everything before the first ':') — otherwise every :proc child falls
+        // through "Not in config" and runs UNSPOOFED. This is the single reason a
+        // multi-process game (MLBB, many Unity titles) showed the real device.
+        std::string base_package(package_name);
+        size_t colon = base_package.find(':');
+        if (colon != std::string::npos) {
+            base_package = base_package.substr(0, colon);
+            PKG_LOG("  child process -> matching base package: %s", base_package.c_str());
+        }
+
         do_android_id = false;
         do_prop_cow   = false;
 
@@ -450,7 +465,7 @@ public:
 
             // ✅ Search in device_packages (DeviceInfo + map of packages)
             for (auto& device_entry : device_packages) {
-                auto it = device_entry.second.find(package_name);
+                auto it = device_entry.second.find(base_package);
                 if (it != device_entry.second.end()) {
                     found_in_config = true;
                     flags = it->second;  // Copy flags
@@ -462,8 +477,8 @@ public:
             }
 
             // Check blacklist and cpu_only
-            bool is_blacklisted = (cpu_blacklist.find(package_name) != cpu_blacklist.end());
-            bool is_cpu_only = (cpu_only_packages.find(package_name) != cpu_only_packages.end());
+            bool is_blacklisted = (cpu_blacklist.find(base_package) != cpu_blacklist.end());
+            bool is_cpu_only = (cpu_only_packages.find(base_package) != cpu_only_packages.end());
 
             if (is_blacklisted) {
                 found_in_config = true;
