@@ -44,8 +44,6 @@
         </div>
         <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_androidid">Android ID</span><span class="field__opt" data-i18n="opt_optional">(optional)</span><span class="field__warn field__warn--inline" id="dfAndroidIdInfo" role="button" tabindex="0" data-i18n-attr="aria-label:info_aria" aria-label="What's this?">${WARN_SVG}</span><span class="field__gen" id="dfAndroidIdGen" role="button" tabindex="0" data-i18n="serial_gen">Generate</span></span>
           <input class="field__input field__input--mono" id="dfAndroidId" type="text" maxlength="16" inputmode="latin" placeholder="a1b2c3d4e5f60718" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
-        <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_serial">Serial Number</span><span class="field__opt" data-i18n="opt_optional">(optional)</span><span class="field__gen" id="dfSerialGen" role="button" tabindex="0" data-i18n="serial_gen">Generate</span></span>
-          <input class="field__input field__input--mono" id="dfSerial" type="text" maxlength="24" placeholder="1A2B3C4D" /></label>
         <div class="adv-group" id="dfAdvGroup">
           <button type="button" class="adv-toggle" id="dfAdvToggle" aria-expanded="false">
             <span class="field__label" data-i18n="dev_adv_title">Advanced build props</span>
@@ -54,6 +52,8 @@
             <svg class="adv-caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="adv-body" id="dfAdvBody" hidden>
+            <label class="field"><span class="field__head"><span class="field__label" data-i18n="dev_f_serial">Serial Number</span><span class="field__opt" data-i18n="opt_optional">(optional)</span><span class="field__gen" id="dfSerialGen" role="button" tabindex="0" data-i18n="serial_gen">Generate</span></span>
+              <input class="field__input field__input--mono" id="dfSerial" type="text" maxlength="24" placeholder="1A2B3C4D" /></label>
             <div class="field-row">
               <label class="field"><span class="field__label" data-i18n="dev_f_board">Board</span>
                 <input class="field__input field__input--mono" id="dfBoard" type="text" placeholder="sm8650" autocapitalize="off" autocorrect="off" spellcheck="false" /></label>
@@ -323,7 +323,7 @@
       $m('#dfSdk').value = d.SDK_INT || '';
       $m('#dfSerial').value = d.SERIAL || '';
       $m('#dfAndroidId').value = d.ANDROID_ID || '';
-      let hasAdv = false;
+      let hasAdv = !!d.SERIAL;                   // Serial now lives in Advanced → expand if set
       ADV_FIELDS.forEach(([id, key]) => { const v = d[key] || ''; $m('#' + id).value = v; if (v) hasAdv = true; });
       setAdvOpen(hasAdv);                       // auto-expand if this profile uses any
     } else {
